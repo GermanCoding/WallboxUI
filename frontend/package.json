@@ -1,0 +1,24 @@
+{
+  "name": "vuetify-test",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mdi/font": "7.0.96",
+    "axios": "^1.6.3",
+    "humanize-duration": "^3.31.0",
+    "roboto-fontface": "*",
+    "vue": "^3.2.0",
+    "vue-router": "^4.2.5",
+    "vuetify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "unplugin-fonts": "^1.0.3",
+    "vite": "^4.2.0",
+    "vite-plugin-vuetify": "^1.0.0"
+  }
+}
