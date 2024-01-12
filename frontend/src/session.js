@@ -2,6 +2,7 @@ import {reactive} from 'vue'
 import axios from "axios";
 
 const API_BASE = import.meta.env.VITE_API_BASE;
+const API_ADMIN = import.meta.env.VITE_API_ADMIN;
 
 export const session = reactive({
   _sessionToken: {
@@ -115,6 +116,6 @@ export const session = reactive({
     });
   },
   getAdminURL() {
-    return new URL(API_BASE + "../admin/").toString();
+    return API_ADMIN;
   }
 })

@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'knox',
+    'django_probes',
 ]
 
 MIDDLEWARE = [
