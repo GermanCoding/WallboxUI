@@ -11,8 +11,8 @@ import asyncudp
 from django.core.management import BaseCommand
 
 from api.models import Wallbox, ChargeSession, RFIDToken
+from backend.settings import WALLBOX_IP
 
-WALLBOX_IP = "192.168.12.39"
 WALLBOX_PORT = 7090
 DESTINATION = (WALLBOX_IP, WALLBOX_PORT)
 LOCAL_IP = "0.0.0.0"

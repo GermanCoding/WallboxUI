@@ -9,22 +9,45 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
+def envbool(s, default):
+    v = os.getenv(s, default=default)
+    if isinstance(v, bool):
+        return v
+    if v not in ("", "True", "False"):
+        raise Exception(f"Unknown boolean: {v}")
+    return v == "True"
+
+
+def envint(s, default):
+    v = os.getenv(s, default)
+    if v == "None":
+        return None
+    return int(v)
+
+
+def envstr(s, default):
+    return os.getenv(s, default=default)
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+qfe#tj92590@@u&=1nza7a7t%-m5p+0t7^t6x)%=3q3x&qwf!'
+SECRET_KEY = envstr("SECRET_KEY", 'django-insecure-+qfe#tj92590@@u&=1nza7a7t%-m5p+0t7^t6x)%=3q3x&qwf!')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = envbool("DEBUG", True)
 
-ALLOWED_HOSTS = []
+WALLBOX_IP = envstr("WALLBOX_IP", None)
+
+ALLOWED_HOSTS = envstr("ALLOWED_HOSTS", "*").split(",")
 
 # Application definition
 
@@ -37,7 +60,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api',
     'rest_framework',
-    'drf_spectacular',
     'knox',
 ]
 
@@ -81,6 +103,39 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+if envstr("DB", None) == "postgres":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "HOST": envstr("DB_HOST", ""),
+            "PORT": envstr("DB_PORT", ""),
+            "NAME": envstr("DB_NAME", ""),
+            "USER": envstr("DB_USER", ""),
+            "PASSWORD": envstr("DB_PASSWORD", ""),
+            "CONN_MAX_AGE": envstr("DB_CONN_MAX_AGE", None),
+            "TEST": {"CHARSET": "UTF8"},
+            "OPTIONS": {
+                "sslmode": envstr("DB_SSLMODE", "prefer"),
+                "target_session_attrs": envstr(
+                    "DB_TARGET_SESSION_ATTRS", "read-write"
+                ),
+            },
+        }
+    }
+
+if envstr("DB", None) == "mysql":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "HOST": envstr("DB_HOST", ""),
+            "PORT": envstr("DB_PORT", ""),
+            "NAME": envstr("DB_NAME", ""),
+            "USER": envstr("DB_USER", ""),
+            "PASSWORD": envstr("DB_PASSWORD", ""),
+            "TEST": {"CHARSET": "UTF8"},
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -134,3 +189,7 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '0.0.1',
     'SERVE_INCLUDE_SCHEMA': False,
 }
+
+if envbool("HTTPS", False):
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
