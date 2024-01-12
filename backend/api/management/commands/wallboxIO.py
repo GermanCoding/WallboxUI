@@ -6,12 +6,14 @@ import os
 import signal
 import time
 from decimal import Decimal
+from urllib.error import URLError
+import urllib.request
 
 import asyncudp
 from django.core.management import BaseCommand
 
 from api.models import Wallbox, ChargeSession, RFIDToken
-from backend.settings import WALLBOX_IP
+from backend.settings import WALLBOX_IP, HEALTHCHECK_URL
 
 WALLBOX_PORT = 7090
 DESTINATION = (WALLBOX_IP, WALLBOX_PORT)
@@ -234,6 +236,12 @@ async def main():
             if await comm.probe():
                 last_probe = time.time()
                 schedule_probe = False
+                try:
+                    loop = asyncio.get_event_loop()
+                    future = loop.run_in_executor(None, urllib.request.urlopen, HEALTHCHECK_URL)
+                    await future
+                except URLError:
+                    print("Unable to notify probe success to health checks")
         else:
             if not await comm.receive_status():
                 schedule_probe = True
