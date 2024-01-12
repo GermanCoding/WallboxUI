@@ -209,3 +209,5 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
     "django.contrib.auth.hashers.ScryptPasswordHasher",
 ]
+
+LOGOUT_REDIRECT_URL = "/"
