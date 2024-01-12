@@ -5,7 +5,7 @@
 <template>
   <v-responsive class="text-center">
 
-    <v-img height="300" src="@/assets/logo.svg"/>
+    <v-img height="300" src="@/assets/logo.png"/>
 
     <div class="text-body-2 font-weight-light mb-n1">Welcome to</div>
 

@@ -209,9 +209,9 @@ class ChargeSession(models.Model):
             return cls.SESSION_STATUS_UNKNOWN
 
 
-# Don't show automatically managed tables in the admin UI. This makes it harder to perform accidental modifications.
+# Don't show sensitive tables in the admin UI. This makes it harder to perform accidental modifications.
 # (But do show it for development purposes)
 if settings.DEBUG:
-    admin.site.register(Wallbox)
     admin.site.register(ChargeSession)
 admin.site.register(RFIDToken)
+admin.site.register(Wallbox)

@@ -20,6 +20,9 @@ from knox import views as knox_views
 
 from api import views
 
+admin.site.site_header = 'Keba Wallbox Admin Panel'
+admin.site.site_title = 'Wallbox Admin'
+
 # router = routers.DefaultRouter()
 # router.register(r'charge_sessions/list/', views.ChargeSessionList.as_view())
 
