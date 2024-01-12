@@ -47,7 +47,10 @@ DEBUG = envbool("DEBUG", True)
 
 WALLBOX_IP = envstr("WALLBOX_IP", None)
 
-ALLOWED_HOSTS = envstr("ALLOWED_HOSTS", "*").split(",")
+if envstr("ALLOWED_HOSTS", None):
+    ALLOWED_HOSTS = envstr("ALLOWED_HOSTS", None).split(",")
+if envstr("CSRF_TRUSTED_ORIGINS", None):
+    CSRF_TRUSTED_ORIGINS = envstr("CSRF_TRUSTED_ORIGINS", None).split(",")
 
 # Application definition
 
@@ -195,3 +198,14 @@ SPECTACULAR_SETTINGS = {
 if envbool("HTTPS", False):
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+
+HASH_ITERATIONS = envint("HASH_ITERATIONS", 720000)
+
+PASSWORD_HASHERS = [
+    "backend.hashers.TunedPBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.ScryptPasswordHasher",
+]
