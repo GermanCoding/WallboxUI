@@ -23,18 +23,11 @@ from api import views
 admin.site.site_header = 'Keba Wallbox Admin Panel'
 admin.site.site_title = 'Wallbox Admin'
 
-# router = routers.DefaultRouter()
-# router.register(r'charge_sessions/list/', views.ChargeSessionList.as_view())
-
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('api/', include(router.urls)),
-    path('api/charge_sessions/list/', views.ChargeSessionList.as_view(), name='knox_login'),
-    path('api/login/', views.LoginView.as_view()),
+    path('api/charge_sessions/list/', views.ChargeSessionList.as_view()),
+    path('api/wallboxes/list/', views.WallboxList.as_view()),
+    path('api/login/', views.LoginView.as_view(), name='knox_login'),
     path('api/logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
     path('api/logoutall/', knox_views.LogoutAllView.as_view(), name='knox_logoutall'),
 ]
-
-# urlpatterns += router.urls
-
-# urlpatterns = format_suffix_patterns(urlpatterns)

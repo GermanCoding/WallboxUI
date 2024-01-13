@@ -1,27 +1,6 @@
 <script>
-import humanizeDuration from "humanize-duration";
 import {session} from "../session.js";
-
-function formatValue(value, unit) {
-  // TODO: Prefix as appropriate
-  return value + " " + unit;
-}
-
-function formatDuration(duration) {
-  let units = ["h", "m", "s"];
-  if (duration > (24 * 60 * 60 * 1000)) {
-    units = ["d", "h", "m"];
-  }
-  return humanizeDuration(duration, {units: units, language: "de", round: true});
-}
-
-function tokenToString(token) {
-  if (token.name) {
-    return token.name;
-  } else {
-    return token.tokenID + "/" + token.tokenClass;
-  }
-}
+import {formatDuration, formatValue, STOP_REASONS, tokenToString} from "@/utils";
 
 export default {
   data() {
@@ -50,7 +29,20 @@ export default {
       raw_data: [],
     }
   },
-  methods: {},
+  methods: {
+    fetch() {
+      this.loading = true;
+      session.sendGetToAPI("charge_sessions/list/").then(response => {
+        this.error = null;
+        this.raw_data = response.data
+      }).catch(error => {
+        console.log(error);
+        this.error = error;
+      }).finally(() => {
+        this.loading = false;
+      })
+    }
+  },
   computed: {
     chargeLogItems() {
       let items = [];
@@ -66,7 +58,7 @@ export default {
           hardwarePowerLimit: formatValue(rawItem.hardwareCurrentLimit, "A"),
           energyMeterAtStart: formatValue(rawItem.energyMeterAtStart, "Wh"),
           chargedEnergy: formatValue(rawItem.chargedEnergy, "Wh"),
-          stopReason: rawItem.stopReason,
+          stopReason: STOP_REASONS[rawItem.stopReason],
           authCard: token,
           sessionID: rawItem.sessionID,
         })
@@ -82,16 +74,10 @@ export default {
     }
   },
   mounted() {
-    this.loading = true;
-    session.sendGetToAPI("charge_sessions/list/").then(response => {
-      this.error = null;
-      this.raw_data = response.data
-    }).catch(error => {
-      console.log(error);
-      this.error = error;
-    }).finally(() => {
-      this.loading = false;
-    })
+    this.fetch();
+  },
+  updated() {
+    this.fetch();
   }
 }
 </script>

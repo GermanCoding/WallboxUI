@@ -1,0 +1,57 @@
+import humanizeDuration from "humanize-duration";
+
+export function formatValue(value, unit) {
+  // TODO: Prefix as appropriate
+  return value + " " + unit;
+}
+
+export function formatDuration(duration) {
+  let units = ["h", "m", "s"];
+  if (duration > (24 * 60 * 60 * 1000)) {
+    units = ["d", "h", "m"];
+  }
+  return humanizeDuration(duration, {units: units, language: "de", round: true});
+}
+
+export function tokenToString(token) {
+  if (token.name) {
+    return token.name;
+  } else {
+    return token.tokenID + "/" + token.tokenClass;
+  }
+}
+
+export const STOP_REASONS = {
+  SESSION_RUNNING: "Ladesitzung läuft noch",
+  SESSION_CABLE_UNPLUGGED: "Kabel entfernt",
+  SESSION_CARD_DEAUTH: "RFID-Karte",
+  SESSION_STATUS_UNKNOWN: "Unbekannt",
+}
+
+
+export const TIME_STATUS = {
+  UC_TQ_NONE: "Uhrzeit nicht eingestellt (keine Informationen)",
+  UC_TQ_NOT_SYNCED: "Uhrzeit nicht korrekt (Standardeinstellungen)",
+  UC_TQ_WEAK: "Uhrzeit eingestellt, aber die Genauigkeit ist unbekannt",
+  UC_TQ_STRONG: "Uhrzeit wurde mit Zeitserver synchronisiert",
+  UC_TQ_UNKNOWN: "Unbekannt"
+}
+
+export const SYSTEM_STATE = {
+  STATE_STARTUP: "Startet",
+  STATE_NOT_READY: "Nicht bereit: nicht autorisiert/nicht verbunden",
+  STATE_READY: "Bereit zum laden, wartet auf Fahrzeug",
+  STATE_CHARGING: "Lädt",
+  STATE_ERROR: "Ein Fehler ist aufgetreten",
+  STATE_INTERRUPTED: "Temporärer Fehler (ggf. neu verbinden/neu autorisieren)",
+  STATE_UNKNOWN: "Unbekannt",
+}
+
+export const PLUG_STATE = {
+  PLUG_CABLE_UNPLUGGED: "Kein Kabel (aufseiten der Wallbox) verbunden",
+  PLUG_CABLE_UNLOCKED_NOT_CONNECTED: "Kabel in Wallbox eingesteckt, aber nicht mit Fahrzeug verbunden oder verriegelt",
+  PLUG_CABLE_LOCKED_NOT_CONNECTED: "Kabel in Wallbox eingesteckt und verriegelt, aber nicht mit Fahrzeug verbunden",
+  PLUG_CABLE_CONNECTED_UNLOCKED: "Kabel beidseitig verbunden, aber nicht verriegelt",
+  PLUG_CABLE_CONNECTED_LOCKED: "Kabel beidseitig verbunden und verriegelt",
+  PLUG_CABLE_UNKNOWN: "Unbekannt"
+}

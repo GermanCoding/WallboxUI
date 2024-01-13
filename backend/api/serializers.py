@@ -1,12 +1,13 @@
 from rest_framework import serializers
 
-from api.models import ChargeSession, RFIDToken
+from api.models import ChargeSession, RFIDToken, Wallbox
 
 
 class RFIDSerializer(serializers.ModelSerializer):
     class Meta:
         model = RFIDToken
-        fields = ['name', 'tokenID', 'tokenClass']
+        exclude = ['id']
+        # fields = ['name', 'tokenID', 'tokenClass']
 
 
 class ChargeSessionSerializer(serializers.ModelSerializer):
@@ -14,5 +15,12 @@ class ChargeSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChargeSession
-        fields = ['sessionID', 'hardwareCurrentLimit', 'energyMeterAtStart', 'chargedEnergy', 'started', 'ended',
-                  'stopReason', 'token']
+        exclude = ['created']
+        # fields = ['sessionID', 'hardwareCurrentLimit', 'energyMeterAtStart', 'chargedEnergy', 'started', 'ended',
+        #          'stopReason', 'token']
+
+
+class WallboxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Wallbox
+        exclude = []

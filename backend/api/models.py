@@ -83,6 +83,7 @@ class Wallbox(models.Model):
     currentPowerFactor = models.DecimalField(max_digits=4, decimal_places=1, default=Decimal(0))
     currentSession = models.DecimalField(max_digits=9, decimal_places=1, default=Decimal(0))
     energyMeter = models.DecimalField(max_digits=9, decimal_places=1, default=Decimal(0))
+    lastUpdated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         if self.product:

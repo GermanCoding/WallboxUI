@@ -1,7 +1,10 @@
 <script>
 import {session} from "./session.js";
+import Status from "@/components/Status.vue";
 
-const title = "Keba Wallbox Management";
+const TITLE = "Keba Wallbox Management";
+const DISCLAIMER_TEXT = "";
+const VERSION = __APP_VERSION__;
 
 export default {
   data() {
@@ -12,17 +15,27 @@ export default {
       username: null,
       password: null,
       error_text: null,
+      loading: false,
+      reload: false,
     }
   },
   methods: {
+    click() {
+      this.reload = !this.reload;
+    },
     login() {
+      if (this.loading) {
+        return;
+      }
+      this.loading = true;
       this.error_text = null;
       session.login(this.username, this.password).then(() => {
         this.username = null;
       }).catch(error => {
         this.error_text = error;
       }).finally(() => {
-        this.password = null;
+        this.password = "";
+        this.loading = false;
       });
     },
     required(v) {
@@ -47,21 +60,23 @@ export default {
     <template v-if="session.isLoggedIn()">
       <v-app-bar v-if="mobile" app>
         <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-        <v-toolbar-title>{{ title }}</v-toolbar-title>
+        <v-toolbar-title>{{ TITLE }}</v-toolbar-title>
       </v-app-bar>
 
       <v-navigation-drawer v-model="drawer">
-        <v-list-item v-if="!mobile" :title=title subtitle="Demo"></v-list-item>
+        <v-list-item v-if="!mobile" :title=TITLE :subtitle=VERSION></v-list-item>
         <v-divider></v-divider>
-        <v-list-item link prepend-icon="mdi-history" title="Ladelog" :to="{ name: 'chargelog'}"></v-list-item>
-        <v-list-item link title="Template" :to="{ name: 'template' }"></v-list-item>
+        <v-list-item link prepend-icon="mdi-history" title="Ladelog" :to="{ name: 'chargelog'}"
+                     @click="click"></v-list-item>
+        <v-list-item link prepend-icon="mdi-view-dashboard" title="Status" :to="{ name: 'status' }"
+                     @click="click"></v-list-item>
         <v-list-item link prepend-icon="mdi-security" title="Admin" :href="session.getAdminURL()"></v-list-item>
         <v-divider></v-divider>
         <v-list-item link prepend-icon="mdi-logout" title="Logout" @click="session.logout()"
                      class="py-3"></v-list-item>
       </v-navigation-drawer>
       <v-main>
-        <RouterView/>
+        <RouterView :key="reload"/>
       </v-main>
     </template>
     <template v-else>
@@ -74,7 +89,7 @@ export default {
               max-width="448"
               rounded="lg"
             >
-              <v-form @submit.prevent="login()" v-model="formValid">
+              <v-form @submit.prevent="login()" v-model="formValid" ref="loginForm">
                 <div class="text-subtitle-1 text-medium-emphasis">Account</div>
                 <v-text-field
                   :rules="[required]"
@@ -114,8 +129,8 @@ export default {
                         color="surface-variant"
                         variant="tonal"
                 >
-                  <v-card-text class="text-medium-emphasis text-caption">
-                    Demo Text. Hier könnte ihr Text stehen (aber keine Werbung!).
+                  <v-card-text class="text-medium-emphasis text-caption" v-if="DISCLAIMER_TEXT">
+                    {{ DISCLAIMER_TEXT }}
                   </v-card-text>
                 </v-card>
                 <v-alert v-else
@@ -127,7 +142,7 @@ export default {
                 ></v-alert>
 
                 <v-btn
-                  :disabled="!formValid"
+                  :disabled="!formValid || loading"
                   block
                   class="mb-8"
                   color="blue"
