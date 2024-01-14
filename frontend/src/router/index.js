@@ -7,12 +7,12 @@ const router = createRouter({
   routes: [
     {
       path: '/log',
-      alias: '/',
       name: 'chargelog',
       component: ChargeView
     },
     {
       path: '/status',
+      alias: '/',
       name: 'status',
       component: StatusView
     }

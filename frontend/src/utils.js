@@ -5,12 +5,26 @@ export function formatValue(value, unit) {
   return value + " " + unit;
 }
 
+export function formatkWh(value) {
+  return (value / 1000) + " kWh";
+}
+
 export function formatDuration(duration) {
   let units = ["h", "m", "s"];
   if (duration > (24 * 60 * 60 * 1000)) {
     units = ["d", "h", "m"];
   }
-  return humanizeDuration(duration, {units: units, language: "de", round: true});
+  return humanizeDuration(duration, {units: units, language: "de", round: true, maxDecimalPoints: 0});
+}
+
+export function compareTime(timestamp) {
+  let now = new Date()
+  let end = new Date(timestamp)
+  if (now > end) {
+    return "vor " + formatDuration(now - end);
+  } else {
+    return "in " + formatDuration(end - now);
+  }
 }
 
 export function tokenToString(token) {
@@ -30,10 +44,10 @@ export const STOP_REASONS = {
 
 
 export const TIME_STATUS = {
-  UC_TQ_NONE: "Uhrzeit nicht eingestellt (keine Informationen)",
-  UC_TQ_NOT_SYNCED: "Uhrzeit nicht korrekt (Standardeinstellungen)",
+  UC_TQ_NONE: "Nicht eingestellt (keine Informationen)",
+  UC_TQ_NOT_SYNCED: "Nicht korrekt (Standardeinstellungen)",
   UC_TQ_WEAK: "Uhrzeit eingestellt, aber die Genauigkeit ist unbekannt",
-  UC_TQ_STRONG: "Uhrzeit wurde mit Zeitserver synchronisiert",
+  UC_TQ_STRONG: "Mit Zeitserver synchronisiert",
   UC_TQ_UNKNOWN: "Unbekannt"
 }
 

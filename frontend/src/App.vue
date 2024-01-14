@@ -66,9 +66,9 @@ export default {
       <v-navigation-drawer v-model="drawer">
         <v-list-item v-if="!mobile" :title=TITLE :subtitle=VERSION></v-list-item>
         <v-divider></v-divider>
-        <v-list-item link prepend-icon="mdi-history" title="Ladelog" :to="{ name: 'chargelog'}"
-                     @click="click"></v-list-item>
         <v-list-item link prepend-icon="mdi-view-dashboard" title="Status" :to="{ name: 'status' }"
+                     @click="click"></v-list-item>
+        <v-list-item link prepend-icon="mdi-history" title="Ladelog" :to="{ name: 'chargelog'}"
                      @click="click"></v-list-item>
         <v-list-item link prepend-icon="mdi-security" title="Admin" :href="session.getAdminURL()"></v-list-item>
         <v-divider></v-divider>
