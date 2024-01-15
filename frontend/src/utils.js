@@ -1,5 +1,16 @@
 import humanizeDuration from "humanize-duration";
 
+export function download(filename, content, format) {
+  let element = document.createElement('a');
+  element.setAttribute('href', 'data:' + format + ';charset=utf-8,' + encodeURIComponent(content));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
+}
+
 export function formatValue(value, unit) {
   // TODO: Prefix as appropriate
   return value + " " + unit;

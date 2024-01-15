@@ -27,6 +27,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/charge_sessions/list/', views.ChargeSessionList.as_view()),
     path('api/wallboxes/list/', views.WallboxList.as_view()),
+    path('api/tokens/list/', views.RFIDTokenList.as_view()),
     path('api/login/', views.LoginView.as_view(), name='knox_login'),
     path('api/logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
     path('api/logoutall/', knox_views.LogoutAllView.as_view(), name='knox_logoutall'),

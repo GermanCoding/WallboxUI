@@ -6,8 +6,7 @@ from api.models import ChargeSession, RFIDToken, Wallbox
 class RFIDSerializer(serializers.ModelSerializer):
     class Meta:
         model = RFIDToken
-        exclude = ['id']
-        # fields = ['name', 'tokenID', 'tokenClass']
+        exclude = []
 
 
 class ChargeSessionSerializer(serializers.ModelSerializer):
@@ -15,9 +14,7 @@ class ChargeSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChargeSession
-        exclude = ['created']
-        # fields = ['sessionID', 'hardwareCurrentLimit', 'energyMeterAtStart', 'chargedEnergy', 'started', 'ended',
-        #          'stopReason', 'token']
+        exclude = []
 
 
 class WallboxSerializer(serializers.ModelSerializer):

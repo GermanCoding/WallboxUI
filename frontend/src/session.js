@@ -91,13 +91,14 @@ export const session = reactive({
       });
     });
   },
-  sendGetToAPI(request) {
+  sendGetToAPI(request, params) {
     let session_token = this.sessionToken;
     return new Promise(function (resolve, reject) {
       axios.get(API_BASE + request, {
         headers: {
           'Authorization': 'Token ' + session_token
-        }
+        },
+        params: params,
       }).then(response => {
         resolve(response)
       }).catch(error => {

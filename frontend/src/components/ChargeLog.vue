@@ -1,10 +1,15 @@
 <script>
 import {session} from "../session.js";
-import {formatDuration, formatValue, STOP_REASONS, tokenToString} from "@/utils";
+import {download, formatDuration, formatValue, STOP_REASONS, tokenToString} from "@/utils";
 
 export default {
   data() {
     return {
+      exportTokens: null,
+      notBefore: null,
+      notAfter: null,
+      tokens: null,
+      exportValid: null,
       loading: true,
       error: null,
       sortBy: [],
@@ -41,6 +46,39 @@ export default {
       }).finally(() => {
         this.loading = false;
       })
+      session.sendGetToAPI("tokens/list/").then(response => {
+        this.error = null;
+        this.tokens = response.data
+      }).catch(error => {
+        console.log(error);
+        this.error = error;
+      }).finally(() => {
+      })
+    },
+    exportLogs() {
+      let exportTokenIDs = null;
+      if (this.exportTokens) {
+        exportTokenIDs = [];
+        let tokens = this.tokens;
+        this.exportTokens.forEach(function (tokenName) {
+          tokens.forEach(function (token) {
+            if (tokenToString(token) == tokenName) {
+              exportTokenIDs.push(token.id);
+            }
+          });
+        });
+      }
+      session.sendGetToAPI("charge_sessions/list/", {
+        not_before: this.notBefore,
+        not_after: this.notAfter,
+        tokens: exportTokenIDs ? exportTokenIDs.join() : null,
+      }).then(response => {
+        download("export.json", JSON.stringify(response.data), "text/json");
+      }).catch(error => {
+        console.log(error);
+        this.error = error;
+      }).finally(() => {
+      })
     }
   },
   computed: {
@@ -71,6 +109,15 @@ export default {
       } else {
         return this.simple_headers;
       }
+    },
+    selectableTokens() {
+      let selectTokens = [];
+      if (this.tokens) {
+        this.tokens.forEach(function (token) {
+          selectTokens.push(tokenToString(token));
+        });
+      }
+      return selectTokens;
     }
   },
   mounted() {
@@ -114,6 +161,33 @@ export default {
         item-value="sessionID"
       >
       </v-data-table>
+
+      <v-form v-model="exportValid" class="mt-5" @submit.prevent="exportLogs()">
+        <v-row>
+          <v-col class="text-h4" cols="auto">Export</v-col>
+          <v-col>
+            <v-text-field v-model="notBefore" label="Von" placeholder="dd.mm.yyyy" persistent-placeholder
+                          hint="dd.mm.yyyy"></v-text-field>
+          </v-col>
+          <v-col>
+            <v-text-field v-model="notAfter" label="Bis" placeholder="dd.mm.yyyy" persistent-placeholder
+                          hint="dd.mm.yyyy"></v-text-field>
+          </v-col>
+          <v-col>
+            <v-combobox
+              v-model="exportTokens"
+              :items="selectableTokens"
+              label="Nur folgende RFID Tokens"
+              hint="Leer für alle"
+              persistent-hint
+              multiple
+            ></v-combobox>
+          </v-col>
+          <v-col>
+            <v-btn type="submit">Export</v-btn>
+          </v-col>
+        </v-row>
+      </v-form>
 
       <v-alert v-if="error"
                color="error"
