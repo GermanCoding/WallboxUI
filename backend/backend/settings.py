@@ -65,9 +65,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'knox',
     'django_probes',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -213,3 +215,10 @@ PASSWORD_HASHERS = [
 LOGOUT_REDIRECT_URL = "/"
 
 HEALTHCHECK_URL = envstr("HEALTHCHECK_URL", None)
+
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+    ]
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_ALLOW_PRIVATE_NETWORK = True
