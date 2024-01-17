@@ -83,11 +83,22 @@ export const session = reactive({
             session.logout();
           }
         }
-        if (error.response != undefined && error.response.data !== undefined && error.response.data.detail !== undefined) {
-          reject(error.response.data.detail);
-        } else {
-          reject(error.toString());
+        if (error.response != undefined && error.response.data !== undefined) {
+          let response = error.response.data;
+          if (response.detail !== undefined) {
+            reject(error.response.data.detail);
+            return;
+          }
+          if (Array.isArray(response) && response.length > 0 && typeof response[0] === 'string') {
+            let error_strings = "";
+            response.forEach(function (error) {
+              error_strings += " " + error;
+            });
+            reject(error_strings);
+            return;
+          }
         }
+        reject(error.toString());
       });
     });
   },
@@ -108,11 +119,22 @@ export const session = reactive({
             session.logout();
           }
         }
-        if (error.response != undefined && error.response.data !== undefined && error.response.data.detail !== undefined) {
-          reject(error.response.data.detail);
-        } else {
-          reject(error.toString());
+        if (error.response != undefined && error.response.data !== undefined) {
+          let response = error.response.data;
+          if (response.detail !== undefined) {
+            reject(error.response.data.detail);
+            return;
+          }
+          if (Array.isArray(response) && response.length > 0 && typeof response[0] === 'string') {
+            let error_strings = "";
+            response.forEach(function (error) {
+              error_strings += " " + error;
+            });
+            reject(error_strings);
+            return;
+          }
         }
+        reject(error.toString());
       });
     });
   },

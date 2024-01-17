@@ -1,4 +1,7 @@
+import datetime
+
 from django import forms
+from django.utils.timezone import get_current_timezone
 from rest_framework import generics, permissions, serializers
 from rest_framework.authentication import BasicAuthentication
 from knox.views import LoginView as KnoxLoginView
@@ -28,15 +31,18 @@ class ChargeSessionList(generics.ListAPIView):
     def get_queryset(self):
         queryset = ChargeSession.objects.all().order_by('-sessionID')
         try:
-            not_before = validate(self.request.query_params, 'not_before', forms.DateField, required=False)
+            not_before = validate(self.request.query_params, 'not_before', forms.DateField, required=False,
+                                  localize=True)
             not_after = validate(self.request.query_params, 'not_after', forms.DateField, required=False)
-            tokens = validate(self.request.query_params, 'tokens', forms.CharField, required=False)
+            tokens = validate(self.request.query_params, 'tokens', forms.CharField, required=False, localize=True)
         except forms.ValidationError as e:
             raise serializers.ValidationError(e.message)
         if not_before:
+            not_before = datetime.datetime.combine(not_before, datetime.time.min, tzinfo=get_current_timezone())
             queryset = queryset.filter(started__gte=not_before)
         if not_after:
-            queryset = queryset.filter(ended__lte=not_after)
+            not_after = datetime.datetime.combine(not_after, datetime.time.min, tzinfo=get_current_timezone())
+            queryset = queryset.filter(started__lt=not_after)
         if tokens:
             tokens = tokens.split(',')
             try:
