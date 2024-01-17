@@ -221,4 +221,3 @@ if DEBUG:
         "http://localhost:3000",
     ]
     CORS_ALLOW_CREDENTIALS = True
-    CORS_ALLOW_PRIVATE_NETWORK = True
