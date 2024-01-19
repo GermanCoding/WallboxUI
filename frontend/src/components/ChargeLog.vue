@@ -5,8 +5,6 @@ import {download, formatDuration, formatValue, STOP_REASONS, tokenToString} from
 export default {
   data() {
     return {
-      exportType: null,
-      exportMode: "simple",
       exportTokens: null,
       notBefore: null,
       notAfter: null,
@@ -80,59 +78,65 @@ export default {
       }).then(response => {
         this.error = null;
         let json = response.data;
-        let csvMode = this.exportType == "csv";
-        let simple_headers = [
+
+        let replacer = function (key, value) {
+          if (value === null) {
+            return '';
+          }
+          if (typeof value === 'string') {
+            // Check if this string is actually a number
+            if (value.match(/^[+-]?\d+(?:\.\d+)?$/)) {
+              let number = Number(value);
+              return number.toLocaleString();
+            }
+          }
+          return value;
+        }
+
+        let export_headers = [
           {key: "token", displayName: "RFID Token"},
           {key: "started", displayName: "Beginn"},
           {key: "ended", displayName: "Ende"},
           {key: "chargedEnergy", displayName: "Geladene Energie (Wh)"}
         ];
 
-        if (this.exportMode === "simple" || csvMode) {
-          for (let i = 0; i < json.length; i++) {
-            let element = json[i];
-            for (let key in element) {
-              if (!simple_headers.some(header => header.key === key)) {
-                delete element[key];
-              }
+        for (let i = 0; i < json.length; i++) {
+          let element = json[i];
+          for (let key in element) {
+            if (!export_headers.some(header => header.key === key)) {
+              delete element[key];
             }
           }
         }
 
-        if (csvMode) {
-          let replacer = function (key, value) {
-            if (value === null) {
-              return '';
-            }
-            console.log(typeof value);
-            if (typeof value === 'string') {
-              // Check if this string is actually a number
-              if (value.match(/^[+-]?\d+(?:\.\d+)?$/)) {
-                let number = Number(value);
-                return number.toLocaleString("de-DE");
-              }
-            }
-            return value;
-          }
-          if (json.length < 1) {
-            this.error = "Export enthält keine Datensätze.";
-            return;
-          }
-          let fields = Object.keys(json[0]);
-          let csv = json.map(function (row) {
-            return fields.map(function (fieldName) {
-              if (fieldName === "token") {
-                return "\"" + tokenToString(row[fieldName]) + "\"";
-              }
-              return JSON.stringify(row[fieldName], replacer)
-            }).join(';')
-          })
-          csv.unshift(fields.map(rawKey => simple_headers.find(key => key.key == rawKey).displayName).join(';'))
-          csv = csv.join('\r\n');
-          download("export.csv", csv, "text/csv");
-        } else {
-          download("export.json", JSON.stringify(json), "text/json");
+        if (json.length < 1) {
+          this.error = "Export enthält keine Datensätze.";
+          return;
         }
+
+        let fields = Object.keys(json[0]);
+        let csv = json.map(function (row) {
+          return fields.map(function (fieldName) {
+            if (fieldName === "token") {
+              return "\"" + tokenToString(row[fieldName]) + "\"";
+            }
+            return JSON.stringify(row[fieldName], replacer)
+          }).join(';')
+        })
+        csv.unshift(fields.map(rawKey => export_headers.find(key => key.key == rawKey).displayName).join(';'))
+        csv = csv.join('\r\n');
+        let export_filename = "export";
+        if (this.notBefore) {
+          export_filename += "__" + this.notBefore;
+        }
+        if (this.notAfter) {
+          export_filename += "__" + this.notAfter;
+        }
+        if (this.exportTokens && this.exportTokens.length) {
+          export_filename += "__" + this.exportTokens;
+        }
+        export_filename += ".csv";
+        download(export_filename, csv, "text/csv");
       }).catch(error => {
         console.log(error);
         this.error = error;
@@ -181,13 +185,6 @@ export default {
       }
       return selectTokens;
     },
-    exportModeLabel() {
-      if (this.exportMode == "extended") {
-        return "Erweiterter Export";
-      } else {
-        return "Einfacher Export";
-      }
-    },
   },
   mounted() {
     this.fetch();
@@ -231,7 +228,7 @@ export default {
       >
       </v-data-table>
 
-      <v-alert :style="{visibility: error ? 'visible' : 'hidden'}"
+      <v-alert v-if="error"
                color="error"
                icon="$error"
                class="my-12"
@@ -244,7 +241,7 @@ export default {
           <v-col class="text-h4" cols="12">Export</v-col>
         </v-row>
         <v-row>
-          <v-col style="min-width: 150px;" cols="auto">
+          <v-col class="min-size-date" cols="auto">
             <v-tooltip
               location="top"
               text="Führende Nullen sind nicht erforderlich, andere Zeitformate (z.B. 2024-1-2) funktionieren ebenfalls. Leer für beliebiges Datum."
@@ -262,7 +259,7 @@ export default {
               </template>
             </v-tooltip>
           </v-col>
-          <v-col style="min-width: 150px;" cols="auto">
+          <v-col class="min-size-date" cols="auto">
             <v-tooltip
               location="top"
               text="Führende Nullen sind nicht erforderlich, andere Zeitformate (z.B. 2024-1-2) funktionieren ebenfalls. Leer für beliebiges Datum."
@@ -280,7 +277,7 @@ export default {
               </template>
             </v-tooltip>
           </v-col>
-          <v-col style="min-width: 300px;">
+          <v-col class="min-size-tokens">
             <v-combobox
               v-model="exportTokens"
               :items="selectableTokens"
@@ -291,22 +288,7 @@ export default {
             ></v-combobox>
           </v-col>
           <v-col cols="auto">
-            <v-radio-group v-model="exportType" label="Export-Format" :rules="[required]">
-              <v-radio label="JSON" value="json"></v-radio>
-              <v-radio label="CSV" value="csv"></v-radio>
-            </v-radio-group>
-          </v-col>
-          <v-col cols="auto">
-            <v-switch :style="{visibility: exportType == 'json' ? 'visible' : 'hidden'}"
-                      v-model="exportMode"
-                      hide-details
-                      true-value="extended"
-                      false-value="simple"
-                      :label="exportModeLabel"
-            ></v-switch>
-          </v-col>
-          <v-col cols="auto">
-            <v-btn type="submit">Export</v-btn>
+            <v-btn type="submit">Export (CSV)</v-btn>
           </v-col>
         </v-row>
       </v-form>
@@ -317,3 +299,13 @@ export default {
 <script setup>
 //
 </script>
+
+<style scoped>
+.min-size-date {
+  min-width: 150px;
+}
+
+.min-size-tokens {
+  min-width: 300px;
+}
+</style>
