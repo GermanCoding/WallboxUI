@@ -104,6 +104,12 @@ async def update_from_report(report):
         wallbox.currentPowerFactor = Decimal(report['PF']) / Decimal(10)
         wallbox.currentSession = Decimal(report['E pres']) / Decimal(10)
         wallbox.energyMeter = Decimal(report['E total']) / Decimal(10)
+        wallbox.phase1_voltage = Decimal(report['U1'])
+        wallbox.phase2_voltage = Decimal(report['U2'])
+        wallbox.phase3_voltage = Decimal(report['U3'])
+        wallbox.phase1_current = Decimal(report['I1']) / Decimal(1000)
+        wallbox.phase2_current = Decimal(report['I2']) / Decimal(1000)
+        wallbox.phase3_current = Decimal(report['I3']) / Decimal(1000)
     await wallbox.asave()
 
 

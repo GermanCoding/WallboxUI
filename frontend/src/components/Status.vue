@@ -1,6 +1,6 @@
 <script>
 import {session} from "../session.js";
-import {compareTime, formatkWh, PLUG_STATE, SYSTEM_STATE, TIME_STATUS} from "@/utils";
+import {compareTime, formatkWh, formatValue, PLUG_STATE, SYSTEM_STATE, TIME_STATUS} from "@/utils";
 
 export default {
   data() {
@@ -45,6 +45,9 @@ export default {
         currentPowerFactor: box.currentPowerFactor,
         currentSession: formatkWh(box.currentSession),
         energyMeter: formatkWh(box.energyMeter),
+        phase1: formatValue(box.phase1_voltage, "V") + " / " + formatValue(box.phase1_current, "A"),
+        phase2: formatValue(box.phase2_voltage, "V") + " / " + formatValue(box.phase2_current, "A"),
+        phase3: formatValue(box.phase3_voltage, "V") + " / " + formatValue(box.phase3_current, "A"),
         last_update: compareTime(box.lastUpdated),
       };
     },
@@ -61,7 +64,7 @@ export default {
       <v-container v-if="has_data">
         <v-row>
           <v-col>
-            <v-card title="Allgemein">
+            <v-card class="min-size" prepend-icon="mdi-ev-station" title="Allgemein">
               <v-card-text>
                 <v-row no-gutters>
                   <v-col class="font-weight-bold text-left" cols="auto">
@@ -91,7 +94,7 @@ export default {
             </v-card>
           </v-col>
           <v-col>
-            <v-card title="Aktueller Status">
+            <v-card class="min-size" prepend-icon="mdi-information" title="Aktueller Status">
               <v-card-text>
                 <v-row no-gutters>
                   <v-col class="font-weight-bold text-left" cols="auto">
@@ -123,7 +126,7 @@ export default {
         </v-row>
         <v-row>
           <v-col>
-            <v-card title="Energie">
+            <v-card class="min-size" prepend-icon="mdi-lightning-bolt " title="Energie">
               <v-card-text>
                 <v-row no-gutters>
                   <v-col class="font-weight-bold text-left" cols="auto">
@@ -153,7 +156,7 @@ export default {
             </v-card>
           </v-col>
           <v-col>
-            <v-card title="Zählerstand">
+            <v-card class="min-size" prepend-icon="mdi-meter-electric" title="Zählerstand">
               <v-card-text>
                 <v-row no-gutters>
                   <v-col class="font-weight-bold text-left" cols="auto">
@@ -175,11 +178,45 @@ export default {
             </v-card>
           </v-col>
         </v-row>
+        <v-row>
+          <v-col>
+            <v-card class="min-size" prepend-icon="mdi-electric-switch" title="Elektrisch">
+              <v-card-text>
+                <v-row no-gutters>
+                  <v-col class="font-weight-bold text-left" cols="auto">
+                    Phase 1 (Spannung/Strom)
+                  </v-col>
+                  <v-col class="font-weight-regular text-right">
+                    {{ wallbox.phase1 }}
+                  </v-col>
+                </v-row>
+                <v-row no-gutters>
+                  <v-col class="font-weight-bold text-left" cols="auto">
+                    Phase 2 (Spannung/Strom)
+                  </v-col>
+                  <v-col class="font-weight-regular text-right">
+                    {{ wallbox.phase2 }}
+                  </v-col>
+                </v-row>
+                <v-row no-gutters>
+                  <v-col class="font-weight-bold text-left" cols="auto">
+                    Phase 3 (Spannung/Strom)
+                  </v-col>
+                  <v-col class="font-weight-regular text-right">
+                    {{ wallbox.phase3 }}
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-container>
     </v-responsive>
   </v-container>
 </template>
 
 <style scoped>
-
+.min-size {
+  min-width: 400px;
+}
 </style>

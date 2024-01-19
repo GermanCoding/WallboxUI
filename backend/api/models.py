@@ -83,6 +83,12 @@ class Wallbox(models.Model):
     currentPowerFactor = models.DecimalField(max_digits=4, decimal_places=1, default=Decimal(0))
     currentSession = models.DecimalField(max_digits=9, decimal_places=1, default=Decimal(0))
     energyMeter = models.DecimalField(max_digits=9, decimal_places=1, default=Decimal(0))
+    phase1_voltage = models.DecimalField(max_digits=3, decimal_places=0, default=Decimal(0))
+    phase2_voltage = models.DecimalField(max_digits=3, decimal_places=0, default=Decimal(0))
+    phase3_voltage = models.DecimalField(max_digits=3, decimal_places=0, default=Decimal(0))
+    phase1_current = models.DecimalField(max_digits=5, decimal_places=3, default=Decimal(0))
+    phase2_current = models.DecimalField(max_digits=5, decimal_places=3, default=Decimal(0))
+    phase3_current = models.DecimalField(max_digits=5, decimal_places=3, default=Decimal(0))
     lastUpdated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
