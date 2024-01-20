@@ -41,7 +41,7 @@ class ChargeSessionList(generics.ListAPIView):
             not_before = datetime.datetime.combine(not_before, datetime.time.min, tzinfo=get_current_timezone())
             queryset = queryset.filter(started__gte=not_before)
         if not_after:
-            not_after = datetime.datetime.combine(not_after, datetime.time.min, tzinfo=get_current_timezone())
+            not_after = datetime.datetime.combine(not_after, datetime.time.max, tzinfo=get_current_timezone())
             queryset = queryset.filter(started__lt=not_after)
         if tokens:
             tokens = tokens.split(',')
