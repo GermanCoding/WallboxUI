@@ -7,7 +7,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mdi/font": "7.0.96",
+    "@mdi/font": "7.4.47",
     "axios": "^1.6.3",
     "humanize-duration": "^3.31.0",
     "roboto-fontface": "*",
