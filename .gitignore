@@ -13,3 +13,4 @@ db.env
 config.env
 .stversions
 .stignore
+frontend/django-static
