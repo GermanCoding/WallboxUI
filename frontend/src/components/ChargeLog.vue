@@ -37,7 +37,7 @@ export default {
   methods: {
     fetch() {
       this.loading = true;
-      session.sendGetToAPI("charge_sessions/list/").then(response => {
+      session.sendGetToAPI("charge_sessions/list/", null).then(response => {
         this.error = null;
         this.raw_data = response.data
       }).catch(error => {
@@ -46,7 +46,7 @@ export default {
       }).finally(() => {
         this.loading = false;
       })
-      session.sendGetToAPI("tokens/list/").then(response => {
+      session.sendGetToAPI("tokens/list/", null).then(response => {
         this.error = null;
         this.tokens = response.data
       }).catch(error => {
@@ -189,9 +189,6 @@ export default {
   mounted() {
     this.fetch();
   },
-  updated() {
-    this.fetch();
-  }
 }
 </script>
 

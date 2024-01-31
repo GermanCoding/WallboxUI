@@ -1,6 +1,6 @@
 <script>
 import {session} from "../session.js";
-import {compareTime, formatkWh, formatValue, PLUG_STATE, SYSTEM_STATE, TIME_STATUS} from "@/utils";
+import {compareTime, formatDuration, formatkWh, formatValue, PLUG_STATE, SYSTEM_STATE, TIME_STATUS} from "@/utils";
 
 export default {
   data() {
@@ -9,16 +9,19 @@ export default {
       error: null,
       has_data: false,
       raw_data: [],
+      timers: [],
     }
   },
   methods: {
     fetch() {
       this.loading = true;
-      session.sendGetToAPI("wallboxes/list/").then(response => {
+      session.sendGetToAPI("wallboxes/list/", null).then(response => {
         this.error = null;
         this.raw_data = response.data;
         if (this.raw_data.length > 0) {
           this.has_data = true;
+        } else {
+          this.has_data = false;
         }
       }).catch(error => {
         console.log(error);
@@ -26,6 +29,13 @@ export default {
       }).finally(() => {
         this.loading = false;
       })
+    },
+    tick() {
+      if (!this.has_data) {
+        return;
+      }
+      let box = this.raw_data[0];
+      box.uptime += 1;
     },
   },
   computed: {
@@ -49,12 +59,26 @@ export default {
         phase2: formatValue(box.phase2_voltage, "V") + " / " + formatValue(box.phase2_current, "A"),
         phase3: formatValue(box.phase3_voltage, "V") + " / " + formatValue(box.phase3_current, "A"),
         last_update: compareTime(box.lastUpdated),
+        uptime: "vor " + formatDuration(box.uptime * 1000)
       };
     },
   },
   mounted() {
     this.fetch();
+    this.timers.push(setInterval(function () {
+      this.fetch();
+    }.bind(this), 5000));
+
+    this.timers.push(setInterval(function () {
+      this.tick();
+    }.bind(this), 1000));
   },
+  unmounted() {
+    this.timers.forEach(function (timer) {
+      clearInterval(timer);
+    });
+    this.timers = [];
+  }
 }
 </script>
 
@@ -98,14 +122,6 @@ export default {
               <v-card-text>
                 <v-row no-gutters>
                   <v-col class="font-weight-bold text-left" cols="auto">
-                    Uhrzeit
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.timeStatus }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
                     Systemstatus
                   </v-col>
                   <v-col class="font-weight-regular text-right">
@@ -118,6 +134,15 @@ export default {
                   </v-col>
                   <v-col class="font-weight-regular text-right">
                     {{ wallbox.plugState }}
+                  </v-col>
+                </v-row>
+                <v-row no-gutters>
+                  <v-col class="font-weight-bold text-left" cols="auto">
+                    <v-icon icon="mdi-meter-electric"></v-icon>
+                    Zählerstand (kWh)
+                  </v-col>
+                  <v-col class="font-weight-regular text-right">
+                    {{ wallbox.energyMeter }}
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -156,30 +181,6 @@ export default {
             </v-card>
           </v-col>
           <v-col>
-            <v-card class="min-size" prepend-icon="mdi-meter-electric" title="Zählerstand">
-              <v-card-text>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Aktueller Zählerstand (kWh)
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.energyMeter }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Zuletzt aktualisiert
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.last_update }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
             <v-card class="min-size" prepend-icon="mdi-electric-switch" title="Elektrisch">
               <v-card-text>
                 <v-row no-gutters>
@@ -210,6 +211,41 @@ export default {
             </v-card>
           </v-col>
         </v-row>
+        <v-row>
+          <v-col>
+            <v-card class="min-size" prepend-icon="mdi-clock-time-eight" title="Zeit/Synchronisation">
+              <v-card-text>
+                <v-row no-gutters>
+                  <v-col class="font-weight-bold text-left" cols="auto">
+                    Status Uhrzeit (Wallbox)
+                  </v-col>
+                  <v-col class="font-weight-regular text-right">
+                    {{ wallbox.timeStatus }}
+                  </v-col>
+                </v-row>
+                <v-row no-gutters>
+                  <v-col class="font-weight-bold text-left" cols="auto">
+                    Letzte Kommunikation Oberfläche ↔ Wallbox
+                  </v-col>
+                  <v-col class="font-weight-regular text-right">
+                    {{ wallbox.last_update }}
+                  </v-col>
+                </v-row>
+                <v-row no-gutters>
+                  <v-col class="font-weight-bold text-left" cols="auto">
+                    Letzter Neustart der Wallbox
+                  </v-col>
+                  <v-col class="font-weight-regular text-right">
+                    {{ wallbox.uptime }}
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-container v-else-if="!loading">
+        Keine Wallbox in der Datenbank. IP Adresse und Kommunikation zwischen Oberfläche und Wallbox prüfen.
       </v-container>
     </v-responsive>
   </v-container>
