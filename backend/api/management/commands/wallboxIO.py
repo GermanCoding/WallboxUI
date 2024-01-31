@@ -96,9 +96,11 @@ async def update_from_report(report):
         wallbox.serial = report['Serial']
         wallbox.firmwareVersion = report['Firmware']
         wallbox.timeStatus = Wallbox.time_status_from_raw(int(report['timeQ']))
+        wallbox.uptime = datetime.timedelta(seconds=report['Sec'])
     if report['ID'] == str(2):
         wallbox.state = Wallbox.state_from_raw(int(report['State']))
         wallbox.plug = Wallbox.plug_from_raw(int(report['Plug']))
+        wallbox.uptime = datetime.timedelta(seconds=report['Sec'])
     if report['ID'] == str(3):
         wallbox.currentChargePower = Decimal(report['P']) / Decimal(1000)
         wallbox.currentPowerFactor = Decimal(report['PF']) / Decimal(10)
@@ -110,6 +112,7 @@ async def update_from_report(report):
         wallbox.phase1_current = Decimal(report['I1']) / Decimal(1000)
         wallbox.phase2_current = Decimal(report['I2']) / Decimal(1000)
         wallbox.phase3_current = Decimal(report['I3']) / Decimal(1000)
+        wallbox.uptime = datetime.timedelta(seconds=report['Sec'])
     await wallbox.asave()
 
 

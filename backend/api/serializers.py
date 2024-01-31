@@ -1,3 +1,6 @@
+import datetime
+from django.utils import timezone
+
 from rest_framework import serializers
 
 from api.models import ChargeSession, RFIDToken, Wallbox
@@ -18,6 +21,11 @@ class ChargeSessionSerializer(serializers.ModelSerializer):
 
 
 class WallboxSerializer(serializers.ModelSerializer):
+    uptime = serializers.SerializerMethodField()
+
     class Meta:
         model = Wallbox
         exclude = []
+
+    def get_uptime(self, obj):
+        return int(obj.uptime.total_seconds()) + int((timezone.now() - obj.lastUpdated).total_seconds())

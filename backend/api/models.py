@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 
 from django.contrib import admin
@@ -89,6 +90,7 @@ class Wallbox(models.Model):
     phase1_current = models.DecimalField(max_digits=5, decimal_places=3, default=Decimal(0))
     phase2_current = models.DecimalField(max_digits=5, decimal_places=3, default=Decimal(0))
     phase3_current = models.DecimalField(max_digits=5, decimal_places=3, default=Decimal(0))
+    uptime = models.DurationField(default=datetime.timedelta(seconds=0))
     lastUpdated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
