@@ -9,7 +9,11 @@ from django.conf import settings
 # An RFID card used for authorization on the wallbox.
 class RFIDToken(models.Model):
     class Meta:
+        verbose_name = "RFID Token"
         verbose_name_plural = "RFID Tokens"
+        constraints = [
+            models.UniqueConstraint(fields=['tokenID', 'tokenClass'], name="%(app_label)s_%(class)s_unique")
+        ]
 
     tokenID = models.CharField(max_length=20)
     tokenClass = models.CharField(max_length=20)
