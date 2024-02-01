@@ -29,16 +29,17 @@ export default {
         {title: "Beendet durch", key: "stopReason"},
         {title: "RFID-Karte", key: "authCard"},
         {title: "Sitzungs-ID", key: "sessionID"},
+        {title: "Wallbox", key: "wallboxSerial"}
       ],
       viewMode: "simple",
       raw_data: [],
+      wallboxes: [],
     }
   },
   methods: {
     fetch() {
       this.loading = true;
       session.sendGetToAPI("charge_sessions/list/", null).then(response => {
-        this.error = null;
         this.raw_data = response.data
       }).catch(error => {
         console.log(error);
@@ -47,13 +48,28 @@ export default {
         this.loading = false;
       })
       session.sendGetToAPI("tokens/list/", null).then(response => {
-        this.error = null;
         this.tokens = response.data
       }).catch(error => {
         console.log(error);
         this.error = error;
       }).finally(() => {
       })
+
+      session.sendGetToAPI("wallboxes/list/", null).then(response => {
+        this.wallboxes = response.data
+      }).catch(error => {
+        console.log(error);
+        this.error = error;
+      }).finally(() => {
+      })
+    },
+    wallboxSerialToProduct(serial) {
+      const result = this.wallboxes.find(({box}) => serial === serial);
+      if (result) {
+        return result.product;
+      } else {
+        return "Unbekannt";
+      }
     },
     exportLogs() {
       if (!this.exportValid) {
@@ -97,11 +113,15 @@ export default {
           {key: "token", displayName: "RFID Token"},
           {key: "started", displayName: "Beginn"},
           {key: "ended", displayName: "Ende"},
-          {key: "chargedEnergy", displayName: "Geladene Energie (Wh)"}
+          {key: "chargedEnergy", displayName: "Geladene Energie (Wh)"},
+          {key: "wallboxSerial", displayName: "Seriennummer der Wallbox"},
+          {key: "wallboxProduct", displayName: "Modell"}
         ];
 
         for (let i = 0; i < json.length; i++) {
           let element = json[i];
+          element['wallboxProduct'] = this.wallboxSerialToProduct(element['wallboxSerial']);
+          element['token'] = tokenToString(element['token']);
           for (let key in element) {
             if (!export_headers.some(header => header.key === key)) {
               delete element[key];
@@ -117,9 +137,6 @@ export default {
         let fields = Object.keys(json[0]);
         let csv = json.map(function (row) {
           return fields.map(function (fieldName) {
-            if (fieldName === "token") {
-              return "\"" + tokenToString(row[fieldName]) + "\"";
-            }
             return JSON.stringify(row[fieldName], replacer)
           }).join(';')
         })
@@ -165,6 +182,7 @@ export default {
           stopReason: STOP_REASONS[rawItem.stopReason],
           authCard: token,
           sessionID: rawItem.sessionID,
+          wallboxSerial: rawItem.wallboxSerial
         })
       });
       return items;
