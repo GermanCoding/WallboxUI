@@ -17,6 +17,7 @@ export default {
       error_text: null,
       loading: false,
       reload: false,
+      forgotPasswordDialog: false,
     }
   },
   methods: {
@@ -102,14 +103,27 @@ export default {
 
                 <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
                   Passwort
-                  <a
+                  <v-btn
+                    variant="plain"
                     class="text-caption text-decoration-none text-blue"
-                    href="#"
-                    rel="noopener noreferrer"
-                    target="_blank"
                     tabindex="-1"
                   >
-                    Passwort vergessen?</a>
+                    Passwort vergessen?
+                    <v-dialog
+                      v-model="forgotPasswordDialog"
+                      activator="parent"
+                      width="auto"
+                    >
+                      <v-card>
+                        <v-card-text>
+                          Bitte benachrichtige einen Administrator, um dein Passwort zurückzusetzen.
+                        </v-card-text>
+                        <v-card-actions>
+                          <v-btn color="primary" block @click="forgotPasswordDialog = false">OK</v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+                  </v-btn>
                 </div>
 
                 <v-text-field
