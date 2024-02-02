@@ -226,5 +226,5 @@ class ChargeSession(models.Model):
 # (But do show it for development purposes)
 if settings.DEBUG:
     admin.site.register(ChargeSession)
+    admin.site.register(Wallbox)
 admin.site.register(RFIDToken)
-admin.site.register(Wallbox)
