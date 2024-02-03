@@ -62,6 +62,10 @@ export default {
         uptime: "vor " + formatDuration(box.uptime * 1000)
       };
     },
+    cols() {
+      const {lg} = this.$vuetify.display
+      return lg ? 6 : 12;
+    },
   },
   mounted() {
     this.fetch();
@@ -83,171 +87,167 @@ export default {
 </script>
 
 <template>
-  <v-container class="fill-height">
-    <v-responsive>
-      <v-container v-if="has_data">
-        <v-row>
-          <v-col>
-            <v-card class="min-size" prepend-icon="mdi-ev-station" title="Allgemein">
-              <v-card-text>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Modell
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.product }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left">
-                    Seriennummer
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.serial }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left">
-                    Firmwareversion
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.firmware }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-          <v-col>
-            <v-card class="min-size" prepend-icon="mdi-information" title="Aktueller Status">
-              <v-card-text>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Systemstatus
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.systemState }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Status des Kabels
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.plugState }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    <v-icon icon="mdi-meter-electric"></v-icon>
-                    Zählerstand (kWh)
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.energyMeter }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
-            <v-card class="min-size" prepend-icon="mdi-lightning-bolt " title="Energie">
-              <v-card-text>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Aktuelle Ladeleistung (W)
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.currentChargePower }} W
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Aktuelle Ladeleistung (%)
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.currentPowerFactor }} %
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Aktuelle Sitzung (kWh)
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.currentSession }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-          <v-col>
-            <v-card class="min-size" prepend-icon="mdi-electric-switch" title="Elektrisch">
-              <v-card-text>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Phase 1 (Spannung/Strom)
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.phase1 }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Phase 2 (Spannung/Strom)
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.phase2 }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Phase 3 (Spannung/Strom)
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.phase3 }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
-            <v-card class="min-size" prepend-icon="mdi-clock-time-eight" title="Zeit/Synchronisation">
-              <v-card-text>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Status Uhrzeit (Wallbox)
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.timeStatus }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Letzte Kommunikation Oberfläche ↔ Wallbox
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.last_update }}
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col class="font-weight-bold text-left" cols="auto">
-                    Letzter Neustart der Wallbox
-                  </v-col>
-                  <v-col class="font-weight-regular text-right">
-                    {{ wallbox.uptime }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-      <v-container v-else-if="!loading">
-        Keine Wallbox in der Datenbank. IP Adresse und Kommunikation zwischen Oberfläche und Wallbox prüfen.
-      </v-container>
-    </v-responsive>
+  <v-container class="mt-lg-8" v-if="has_data">
+    <v-row>
+      <v-col :cols="cols">
+        <v-card prepend-icon="mdi-ev-station" title="Allgemein">
+          <v-card-text>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Modell
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.product }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left">
+                Seriennummer
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.serial }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left">
+                Firmwareversion
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.firmware }}
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col>
+        <v-card prepend-icon="mdi-information" title="Aktueller Status">
+          <v-card-text>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Systemstatus
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.systemState }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Status des Kabels
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.plugState }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                <v-icon icon="mdi-meter-electric"></v-icon>
+                Zählerstand (kWh)
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.energyMeter }}
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col :cols="cols">
+        <v-card prepend-icon="mdi-lightning-bolt " title="Energie">
+          <v-card-text>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Aktuelle Ladeleistung (W)
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.currentChargePower }} W
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Aktuelle Ladeleistung (%)
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.currentPowerFactor }} %
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Aktuelle Sitzung (kWh)
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.currentSession }}
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col>
+        <v-card prepend-icon="mdi-electric-switch" title="Elektrisch">
+          <v-card-text>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Phase 1 (Spannung/Strom)
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.phase1 }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Phase 2 (Spannung/Strom)
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.phase2 }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Phase 3 (Spannung/Strom)
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.phase3 }}
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col :cols="cols">
+        <v-card prepend-icon="mdi-clock-time-eight" title="Zeit/Synchronisation">
+          <v-card-text>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Status Uhrzeit (Wallbox)
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.timeStatus }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Letzte Kommunikation Oberfläche ↔ Wallbox
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.last_update }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Letzter Neustart der Wallbox
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.uptime }}
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+  <v-container v-else-if="!loading">
+    Keine Wallbox in der Datenbank. IP Adresse und Kommunikation zwischen Oberfläche und Wallbox prüfen.
   </v-container>
 </template>
 
