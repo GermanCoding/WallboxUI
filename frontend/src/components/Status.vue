@@ -63,8 +63,8 @@ export default {
       };
     },
     cols() {
-      const {lg} = this.$vuetify.display
-      return lg ? 6 : 12;
+      const {	xxl, xl, lg} = this.$vuetify.display
+      return (xxl | xl | lg) ? 6 : 12;
     },
   },
   mounted() {
@@ -87,8 +87,8 @@ export default {
 </script>
 
 <template>
-  <v-container class="mt-lg-8 fill-height" v-if="has_data">
-    <v-responsive class="align-center fill-height">
+  <v-container class="mt-lg-8" v-if="has_data">
+    <v-responsive class="align-center">
       <v-row>
         <v-col :cols="cols">
           <v-card prepend-icon="mdi-ev-station" title="Allgemein">
