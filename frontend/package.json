@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": ""
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
@@ -17,7 +18,7 @@
     "vuetify": "^3.0.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.0.0",
+    "@vitejs/plugin-vue": "^5.0.0",
     "unplugin-fonts": "^1.0.3",
     "vite": "^5.0.0",
     "vite-plugin-vuetify": "^2.0.0"
