@@ -17,7 +17,11 @@ export function formatValue(value, unit) {
 }
 
 export function formatkWh(value) {
-  return (value / 1000) + " kWh";
+  return ((value / 1000).toPrecision(4) / 1) + " kWh";
+}
+
+export function formatMilliAmpere(value) {
+  return ((value / 1000).toPrecision(4) / 1) + " A";
 }
 
 export function formatDuration(duration) {

@@ -77,13 +77,13 @@ export const session = reactive({
       }).then(response => {
         resolve(response)
       }).catch(error => {
-        if (session.isLoggedIn()) {
-          if (error.response.status == 401 || error.response.status == 403) {
-            // Our token is no longer valid
-            session.logout();
-          }
-        }
         if (error.response != undefined && error.response.data !== undefined) {
+          if (session.isLoggedIn()) {
+            if (error.response.status == 401 || error.response.status == 403) {
+              // Our token is no longer valid
+              session.logout();
+            }
+          }
           let response = error.response.data;
           if (response.detail !== undefined) {
             reject(error.response.data.detail);
@@ -113,13 +113,13 @@ export const session = reactive({
       }).then(response => {
         resolve(response)
       }).catch(error => {
-        if (session.isLoggedIn()) {
-          if (error.response.status == 401 || error.response.status == 403) {
-            // Our token is no longer valid
-            session.logout();
-          }
-        }
         if (error.response != undefined && error.response.data !== undefined) {
+          if (session.isLoggedIn()) {
+            if (error.response.status == 401 || error.response.status == 403) {
+              // Our token is no longer valid
+              session.logout();
+            }
+          }
           let response = error.response.data;
           if (response.detail !== undefined) {
             reject(error.response.data.detail);

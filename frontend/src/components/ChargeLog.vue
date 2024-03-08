@@ -1,6 +1,14 @@
 <script>
 import {session} from "../session.js";
-import {download, formatDuration, formatValue, STOP_REASONS, tokenToString} from "@/utils";
+import {
+  download,
+  formatDuration,
+  formatkWh,
+  formatMilliAmpere,
+  formatValue,
+  STOP_REASONS,
+  tokenToString
+} from "@/utils";
 
 export default {
   data() {
@@ -176,14 +184,14 @@ export default {
           started: start.toLocaleString(),
           ended: end.toLocaleString(),
           duration: formatDuration(duration),
-          hardwarePowerLimit: formatValue(rawItem.hardwareCurrentLimit, "A"),
-          energyMeterAtStart: formatValue(rawItem.energyMeterAtStart, "Wh"),
-          chargedEnergy: formatValue(rawItem.chargedEnergy, "Wh"),
+          hardwarePowerLimit: formatMilliAmpere(rawItem.hardwareCurrentLimit),
+          energyMeterAtStart: formatkWh(rawItem.energyMeterAtStart),
+          chargedEnergy: formatkWh(rawItem.chargedEnergy),
           stopReason: STOP_REASONS[rawItem.stopReason],
           authCard: token,
           sessionID: rawItem.sessionID,
           wallboxSerial: rawItem.wallboxSerial
-        })
+        });
       });
       return items;
     },

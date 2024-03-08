@@ -249,7 +249,20 @@ export default {
     </v-responsive>
   </v-container>
   <v-container v-else-if="!loading">
-    Keine Wallbox in der Datenbank. IP Adresse und Kommunikation zwischen Oberfläche und Wallbox prüfen.
+    <v-alert v-if="error"
+             color="error"
+             icon="$error"
+             class="my-12"
+             variant="tonal"
+             :text="error"
+    ></v-alert>
+    <v-alert v-else
+             color="error"
+             icon="$error"
+             class="my-12"
+             variant="tonal"
+             text="Keine Wallbox in der Datenbank. IP Adresse und Kommunikation zwischen Oberfläche und Wallbox prüfen."
+    ></v-alert>
   </v-container>
 </template>
 

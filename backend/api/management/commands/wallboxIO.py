@@ -22,6 +22,7 @@ LOCAL_IP = "0.0.0.0"
 SOURCE = (LOCAL_IP, WALLBOX_PORT)
 
 PROBE_INTERVAL = 3600
+PROBE_INTERVAL_RUNNING = 60
 MIN_WAIT = 0.1
 RESPONSE_TIMEOUT = 5
 
@@ -31,6 +32,7 @@ CONFIGURATION_STATUS = b'report 2'
 CHARGING_STATUS = b'report 3'
 
 schedule_probe = True
+last_state = None
 
 
 def validate_json(string, message_id=None):
@@ -58,8 +60,17 @@ def validate_charging_status(message):
     return validate_json(message, 3)
 
 
-def validate_any_status(message):
-    return validate_system_status(message) or validate_config_status(message) or validate_charging_status(message)
+def validate_progress_report(message):
+    try:
+        parsed = json.loads(message)
+        keys = parsed.keys()
+        print(f"progress report keys keys: {keys}")
+        if len(keys) != 1:
+            return False
+        if next(iter(keys)) in ["E pres", "Max curr", "Enable sys", "Input", "Plug", "State"]:
+            return True
+    except (ValueError, KeyError, TypeError, IndexError):
+        return False
 
 
 def validate_history_report(report_id, message):
@@ -68,9 +79,9 @@ def validate_history_report(report_id, message):
 
 def parse_datetime(timestring_start, timestring_end):
     format = "%Y-%m-%d %H:%M:%S.%f"
-    start = datetime.strptime(timestring_start, format)
+    start = datetime.datetime.strptime(timestring_start, format)
     start = start.replace(tzinfo=datetime.timezone.utc)
-    end = datetime.strptime(timestring_end, format)
+    end = datetime.datetime.strptime(timestring_end, format)
     end = end.replace(tzinfo=datetime.timezone.utc)
     return start, end
 
@@ -140,31 +151,35 @@ async def add_charge_session(raw_data):
 
 class WallboxCommunicator:
     def __init__(self, socket):
+        self.last_state = None
         self.sock = socket
 
     async def _send(self, message, response_validator):
+        resend = True
         while True:
-            # Ensure we limit sending speed
-            await asyncio.sleep(MIN_WAIT)
-            self.sock.sendto(message)
+            if resend:
+                # Ensure we limit sending speed
+                await asyncio.sleep(MIN_WAIT)
+                self.sock.sendto(message)
+                resend = False
             try:
                 data, addr = await asyncio.wait_for(self.sock.recvfrom(), timeout=RESPONSE_TIMEOUT)
             except TimeoutError:
                 print(f"Did not receive a response in time, resending {message}")
+                resend = True
                 continue
             response = data.decode("utf-8")
             if addr != DESTINATION:
                 print(f"Received packet from unauthorized address {addr}, ignoring")
                 continue
             if not response_validator(response):
-                global schedule_probe
-                print(f"Response received did not pass validation, scheduling probe")
+                print(f"Response received did not pass validation, ignoring")
                 print(f"Request was {message}, response was {response}")
-                schedule_probe = True
                 continue
             return response
 
     async def search_for_new_sessions(self):
+        # report 100 is always the currently running session, 101 is sometimes the running session (but not always)
         for history_entries in range(1, 31):
             history_id = 100 + history_entries
             report = ("report " + str(history_id)).encode("utf-8")
@@ -173,6 +188,11 @@ class WallboxCommunicator:
             if session_id == -1:
                 # Empty entry. All subsequent ones will be empty too.
                 break
+            if entry["reason"] not in [1, 10] and int(entry["ended[s]"]) == 0:
+                # Charging session is still running (note that this has been observed to use undocumented) reason IDs
+                # Skip it for now
+                print(f"Debug: Skipping currently running session {session_id}")
+                continue
             if await ChargeSession.try_find_session(session_id):
                 # We already know this session, so we also know all subsequent ones.
                 break
@@ -187,6 +207,7 @@ class WallboxCommunicator:
         print(f"System status: {json.dumps(system_status, indent=4)}")
         config_status = json.loads(await self._send(CONFIGURATION_STATUS, validate_config_status))
         print(f"Config status: {json.dumps(config_status, indent=4)}")
+        self.last_state = int(config_status['State'])
         charging_status = json.loads(await self._send(CHARGING_STATUS, validate_charging_status))
         print(f"Charging status: {json.dumps(charging_status, indent=4)}")
         await update_from_report(system_status)
@@ -196,27 +217,29 @@ class WallboxCommunicator:
         return True
 
     async def receive_status(self):
+        interval = PROBE_INTERVAL_RUNNING if last_state == 3 else PROBE_INTERVAL
         while True:
             try:
-                data, addr = await asyncio.wait_for(self.sock.recvfrom(), timeout=PROBE_INTERVAL)
+                data, addr = await asyncio.wait_for(self.sock.recvfrom(), timeout=interval)
             except TimeoutError:
                 return None
             response = data.decode("utf-8")
             if addr != DESTINATION:
                 print(f"Received packet from unauthorized address {addr}, ignoring")
                 continue
-            if not validate_any_status(response):
+            if not validate_progress_report(response):
                 global schedule_probe
                 print(
-                    f"Expected to receive status message, but received message did not pass validation, scheduling probe")
+                    f"Expected to receive progress report message, but received message did not pass validation, scheduling probe")
                 print(f"Response was {response}")
                 return False
             report = json.loads(response)
             print(f"Received status message {report}")
-            update_from_report(report)
-            if report["ID"] == str(2):
-                # Report 2 includes state changes, which may indicate that there are new sessions.
-                await self.search_for_new_sessions()
+            if report.get("State", None):
+                if int(report["State"]) != self.last_state:
+                    self.last_state = int(report["State"])
+                    print("State changed, scheduling probe")
+                    return False
             return True
 
     def __del__(self):
@@ -241,7 +264,9 @@ async def main():
     comm = WallboxCommunicator(sock)
     last_probe = time.time()
     while True:
-        if schedule_probe or (time.time() - last_probe) >= PROBE_INTERVAL:
+        interval = PROBE_INTERVAL_RUNNING if comm.last_state == 3 else PROBE_INTERVAL
+        print(f"Debug: using interval {interval}, state {comm.last_state}")
+        if schedule_probe or (time.time() - last_probe) >= interval:
             if await comm.probe():
                 last_probe = time.time()
                 schedule_probe = False

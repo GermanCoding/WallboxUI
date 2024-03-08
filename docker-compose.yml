@@ -12,14 +12,17 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+    ports:
+        - "127.0.0.1:5432:5432"
   backend:
     build:
         context: ./backend
     env_file:
         - config.env
-    ports:
-        - "127.0.0.1:8000:8000"
-        - "0.0.0.0:7090:7090/udp"
+    #ports:
+    #    - "127.0.0.1:8000:8000"
+    #    - "0.0.0.0:7090:7090/udp"
+    network_mode: host
     depends_on:
         - db
     restart: unless-stopped
