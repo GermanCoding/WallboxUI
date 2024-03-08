@@ -64,7 +64,6 @@ def validate_progress_report(message):
     try:
         parsed = json.loads(message)
         keys = parsed.keys()
-        print(f"progress report keys keys: {keys}")
         if len(keys) != 1:
             return False
         if next(iter(keys)) in ["E pres", "Max curr", "Enable sys", "Input", "Plug", "State"]:
@@ -189,7 +188,7 @@ class WallboxCommunicator:
                 # Empty entry. All subsequent ones will be empty too.
                 break
             if entry["reason"] not in [1, 10] and int(entry["ended[s]"]) == 0:
-                # Charging session is still running (note that this has been observed to use undocumented) reason IDs
+                # Charging session is still running (note that this has been observed to use undocumented reason IDs)
                 # Skip it for now
                 print(f"Debug: Skipping currently running session {session_id}")
                 continue
@@ -217,7 +216,7 @@ class WallboxCommunicator:
         return True
 
     async def receive_status(self):
-        interval = PROBE_INTERVAL_RUNNING if last_state == 3 else PROBE_INTERVAL
+        interval = PROBE_INTERVAL_RUNNING if self.last_state == 3 else PROBE_INTERVAL
         while True:
             try:
                 data, addr = await asyncio.wait_for(self.sock.recvfrom(), timeout=interval)
@@ -235,11 +234,9 @@ class WallboxCommunicator:
                 return False
             report = json.loads(response)
             print(f"Received status message {report}")
-            if report.get("State", None):
-                if int(report["State"]) != self.last_state:
-                    self.last_state = int(report["State"])
-                    print("State changed, scheduling probe")
-                    return False
+            if not report.get("E pres", None):
+                print("Some state changed (except energy meter), scheduling probe")
+                return False
             return True
 
     def __del__(self):
