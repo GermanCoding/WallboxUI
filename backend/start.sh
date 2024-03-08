@@ -12,7 +12,7 @@ python ./manage.py migrate
 python ./manage.py wallboxIO &
 io=$!
 
-daphne -b 0.0.0.0 backend.asgi:application &
+daphne -b 127.0.0.1 backend.asgi:application &
 daphne=$!
 
 wait -n
