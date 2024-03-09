@@ -193,7 +193,7 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Wallbox API',
     'DESCRIPTION': 'A small homemade API to view charge session logs from a Keba P-30 Wallbox',
-    'VERSION': '0.0.1',
+    'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
