@@ -1,7 +1,7 @@
 FROM python:slim-bookworm
 ENV PYTHONUNBUFFERED=1
 
-RUN mkdir -p /opt/wallbox-ui
+RUN apt update && apt install postgresql-client -y --no-install-recommends && mkdir -p /opt/wallbox-ui
 WORKDIR /opt/wallbox-ui
 # Don't copy everything initially to enable better build caching
 COPY ./requirements.txt /opt/wallbox-ui/
