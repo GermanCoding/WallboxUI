@@ -12,8 +12,7 @@ export function download(filename, content, format) {
 }
 
 export function formatValue(value, unit) {
-  // TODO: Prefix as appropriate
-  return value + " " + unit;
+  return (value / 1) + " " + unit;
 }
 
 export function formatkWh(value) {

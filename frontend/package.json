@@ -1,6 +1,6 @@
 {
-  "name": "vuetify-test",
-  "version": "1.0.0",
+  "name": "wallbox-frontend",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",

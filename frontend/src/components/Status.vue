@@ -51,8 +51,8 @@ export default {
         timeStatus: TIME_STATUS[box.timeStatus],
         systemState: SYSTEM_STATE[box.state],
         plugState: PLUG_STATE[box.plug],
-        currentChargePower: box.currentChargePower,
-        currentPowerFactor: box.currentPowerFactor,
+        currentChargePower: formatValue(box.currentChargePower, "W"),
+        currentPowerFactor: formatValue(box.currentPowerFactor, "%"),
         currentSession: formatkWh(box.currentSession),
         energyMeter: formatkWh(box.energyMeter),
         phase1: formatValue(box.phase1_voltage, "V") + " / " + formatValue(box.phase1_current, "A"),
@@ -161,7 +161,7 @@ export default {
                   Aktuelle Ladeleistung (W)
                 </v-col>
                 <v-col class="font-weight-regular text-right">
-                  {{ wallbox.currentChargePower }} W
+                  {{ wallbox.currentChargePower }}
                 </v-col>
               </v-row>
               <v-row no-gutters>
@@ -169,7 +169,7 @@ export default {
                   Aktuelle Ladeleistung (%)
                 </v-col>
                 <v-col class="font-weight-regular text-right">
-                  {{ wallbox.currentPowerFactor }} %
+                  {{ wallbox.currentPowerFactor }}
                 </v-col>
               </v-row>
               <v-row no-gutters>
