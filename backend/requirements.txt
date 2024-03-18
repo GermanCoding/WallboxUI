@@ -1,5 +1,5 @@
 asyncudp==0.11.0
-Django==5.0.2
+Django==5.0.3
 django-rest-knox==4.2.0
 djangorestframework==3.14.0
 django_probes==1.7.0
