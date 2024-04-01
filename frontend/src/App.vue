@@ -2,7 +2,7 @@
 import {session} from "./session.js";
 import Status from "@/components/Status.vue";
 
-const TITLE = "Keba Wallbox Management";
+const TITLE = "Wallbox UI";
 const DISCLAIMER_TEXT = "";
 const VERSION = __APP_VERSION__;
 

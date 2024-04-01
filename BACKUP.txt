@@ -2,7 +2,7 @@ Creating a backup of your database (charge logs, users, passwords, wallbox statu
 
 1. Find out the names of your wallbox backend container:
 $ docker ps
-(look for "wallbox backend" containers. It's usually wallbox_backend_1 on old Docker versions, wallbox-backend-1 on newer Docker versions)
+(look for "wallbox backend" containers)
 2. Dump the current schema to a file:
 $ docker exec <backend container name> python manage.py dumpdata contenttypes --indent=4 --natural-foreign > contenttype.json
 3. Dump the current data to a file:

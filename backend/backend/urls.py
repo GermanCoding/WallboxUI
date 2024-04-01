@@ -20,7 +20,7 @@ from knox import views as knox_views
 
 from api import views
 
-admin.site.site_header = 'Keba Wallbox Admin Panel'
+admin.site.site_header = 'Wallbox Admin Panel'
 admin.site.site_title = 'Wallbox Admin'
 
 urlpatterns = [

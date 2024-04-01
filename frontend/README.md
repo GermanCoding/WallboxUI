@@ -1,4 +1,4 @@
-# Keba Wallbox UI
+# Wallbox UI
 
 ## Project setup
 
