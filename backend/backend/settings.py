@@ -54,6 +54,7 @@ if envstr("CSRF_TRUSTED_ORIGINS", None):
 
 # Application definition
 
+# If any app requires static files, remember to update frontend as well
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -175,6 +176,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+# Keep in sync with frontend/Dockerfile
 STATIC_URL = 'static/'
 STATIC_ROOT = '../frontend/django-static/'
 
