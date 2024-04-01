@@ -3,6 +3,8 @@
 *.pyc
 *.swp
 *.tmp
+.idea
+.vite
 __pycache__
 db.sqlite3
 media
