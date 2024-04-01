@@ -23,14 +23,15 @@ with real-time data about your wallbox.
 
 ### Deployment (production)
 
-Deploying this is currently a bit janky. You're welcome to submit an improved process if you're able to do so. The
+Deploying this should be mostly straightforward. The
 reference deployment currently uses docker-compose. You can deploy this
 via alternate means as well - I suggest reading through the development documentation
 to get a grip on how stuff works.
 
 For docker-compose, the following things need to be done:
 
-1. Add configuration
+1. Clone this repository to your local disk, if you haven't already (refer to git clone for details).
+2. Add configuration:
     - The included compose file loads configuration from a `config.env` file (for backend configuration) and
       a `db.env` (for database configuration) by default.
 
@@ -57,7 +58,7 @@ For docker-compose, the following things need to be done:
         HEALTHCHECK_URL=<my monitoring URL>
         ```
 
-      The docker compose also spins up a postgres db. Configure (at least) its database name and password (default user
+      The docker compose file also spins up a postgres db. Configure (at least) its database name and password (default user
       is postgres).
       Refer to the official postgres docker image documentation for more information.
 
@@ -66,10 +67,6 @@ For docker-compose, the following things need to be done:
       POSTGRES_DB=<your DB name>
       POSTGRES_PASSWORD=<your DB password>
       ```
-2. **One time setup**: You need to collect the static files from django. Unfortunately, this currently requires a
-   working python installation with django installed. You need to run ``backend/manage.py collectstatic``. This will
-   create static files in the frontend directory, where the static file server container will pick them up. This only
-   has to be done when django is upgraded, or on first-time builds.
 3. Spin up containers: `docker compose up -d --build` (or docker-compose if using the standalone tool instead of the
    plugin).
     - This will (re-)build the containers and spin them up.
@@ -79,7 +76,7 @@ For docker-compose, the following things need to be done:
           successful database connection and communication with the wallbox.
         - A static web server hosting the vue.js frontend
 4. Configure a reverse proxy:
-    - The reverse proxy can be pretty much anything you like (nginx, Apache, caddy...).
+    - The reverse proxy can be pretty much anything you like (nginx, Apache, Traefik, caddy...).
       An example nginx configuration is further down below. In any case, you most provide the following:
         - Your reverse proxy must provide https (you may get away with setting HTTPS=False in your config and using
           plain HTTP, but I don't support that use case). Some reverse proxies like caddy provide https out of the box.
@@ -98,27 +95,25 @@ For docker-compose, the following things need to be done:
     ssl_certificate <my ssl cert>;
     ssl_certificate_key <my ssl key>;
     
-    access_log /var/log/nginx/access.log;
-    
     location / {
-    proxy_set_header Host $host;
-    proxy_pass http://127.0.0.1:8001$request_uri;
+        proxy_set_header Host $host;
+        proxy_pass http://127.0.0.1:8001$request_uri;
     }
     
     location /admin {
-    proxy_set_header Host $host;
-    proxy_pass http://127.0.0.1:8000$request_uri;
+        proxy_set_header Host $host;
+        proxy_pass http://127.0.0.1:8000$request_uri;
     }
     
     location /api {
-    proxy_set_header Host $host;
-    proxy_pass http://127.0.0.1:8000$request_uri;
+        proxy_set_header Host $host;
+        proxy_pass http://127.0.0.1:8000$request_uri;
     }
     }
     ```
 5. Create an initial superuser account: The application always requires authentication, so you need credentials. Run
-   ``sudo docker exec -it <backend container name> python ./manage.py createsuperuser``. You can find out the backend's
-   container name with ``docker ps``. You can now login using these credentials.
+   ``docker exec -it <backend container name> python ./manage.py createsuperuser``. You can find out the backend's
+   container name with ``docker ps``. You can now log in using these credentials.
 
 ### Development
 
@@ -145,8 +140,6 @@ For docker-compose, the following things need to be done:
 
 ### Caveats
 
-- Building and running for production is currently a bit convoluted. We probably need a bit more automation (especially
-  for the collectstatic step - do that in docker as well?)
 - While the backend is language neutral already, the frontend is currently hardcoded to german i18n. Full localization
   support would be welcome.
 - Missing tests

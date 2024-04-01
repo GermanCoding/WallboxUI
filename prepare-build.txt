@@ -1,1 +1,0 @@
-backend/manage.py collectstatic
