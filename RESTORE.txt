@@ -1,11 +1,13 @@
 Restoring from a backup (json dumps of contenttypes and data)
 
+0. Find out your backend container's name. See BACKUP.txt for details.
+
 1. Copy the backup files into the docker backend container, like this:
-$ sudo docker cp contenttype.json wallbox_backend_1:/opt/wallbox-ui
-$ sudo docker cp data.json wallbox_backend_1:/opt/wallbox-ui
+$ docker cp contenttype.json <backend container name>:/opt/wallbox-ui
+$ docker cp data.json <backend container name>:/opt/wallbox-ui
 
 2. Open a shell running within the docker backend container, like this:
-$ sudo docker exec -it wallbox_backend_1 bash
+$ docker exec -it <backend container name> bash
 
 3. If the install is clean (i.e. the target database has not been initialized yet), run (from within the container shell)
 $ python manage.py migrate

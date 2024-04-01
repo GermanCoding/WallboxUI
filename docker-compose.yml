@@ -19,9 +19,13 @@ services:
         context: ./backend
     env_file:
         - config.env
+    # Disabled due to host mode, see below.
     #ports:
     #    - "127.0.0.1:8000:8000"
     #    - "0.0.0.0:7090:7090/udp"
+    # Unfortunately required to work around docker-proxy issues. The wallbox requires us to use UDP source port 7090,
+    # but the docker proxy may port NAT us to another source port. This breaks wallbox communication.
+    # Workaround is to use host mode, which ensures that we bind to the proper source port.
     network_mode: host
     depends_on:
         - db
