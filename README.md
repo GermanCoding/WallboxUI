@@ -20,6 +20,13 @@ with real-time data about your wallbox.
   cable and system status, and more)
 - Security by default: Includes and requires authentication out of the box
     - Secured admin-only access for user management
+ 
+### Screenshots
+
+![Screenshot showing status page](https://github.com/GermanCoding/WallboxUI/assets/4279661/99b252a3-5a3a-4a72-bcb2-dba9560c7a43)
+
+![Screenshot showing charge logs](https://github.com/GermanCoding/WallboxUI/assets/4279661/bcc7073e-e4c4-439d-87b0-71fd1acabf8b)
+
 
 ### Deployment (production)
 
