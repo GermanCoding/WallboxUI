@@ -1,6 +1,15 @@
 <script>
 import {session} from "../session.js";
-import {compareTime, formatDuration, formatkWh, formatValue, PLUG_STATE, SYSTEM_STATE, TIME_STATUS} from "@/utils";
+import {
+  compareTime,
+  formatDuration,
+  formatkW,
+  formatkWh,
+  formatValue,
+  PLUG_STATE,
+  SYSTEM_STATE,
+  TIME_STATUS
+} from "@/utils";
 
 export default {
   data() {
@@ -51,7 +60,7 @@ export default {
         timeStatus: TIME_STATUS[box.timeStatus],
         systemState: SYSTEM_STATE[box.state],
         plugState: PLUG_STATE[box.plug],
-        currentChargePower: formatValue(box.currentChargePower, "W"),
+        currentChargePower: formatkW(box.currentChargePower),
         currentPowerFactor: formatValue(box.currentPowerFactor, "%"),
         currentSession: formatkWh(box.currentSession),
         energyMeter: formatkWh(box.energyMeter),
@@ -63,7 +72,7 @@ export default {
       };
     },
     cols() {
-      const {	xxl, xl, lg} = this.$vuetify.display
+      const {xxl, xl, lg} = this.$vuetify.display
       return (xxl | xl | lg) ? 6 : 12;
     },
   },

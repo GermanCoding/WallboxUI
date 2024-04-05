@@ -15,6 +15,10 @@ export function formatValue(value, unit) {
   return (value / 1) + " " + unit;
 }
 
+export function formatkW(value) {
+  return ((value / 1000).toPrecision(4) / 1) + " kW";
+}
+
 export function formatkWh(value) {
   return ((value / 1000).toPrecision(4) / 1) + " kWh";
 }
