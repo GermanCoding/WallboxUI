@@ -5,6 +5,27 @@ from django.contrib import admin
 from django.db import models
 from django.conf import settings
 
+WALLBOX_TIME_NTP = "WALLBOX_TIME_NTP"
+WALLBOX_TIME_WEAK = "WALLBOX_TIME_WEAK"
+SERVER_TIME = "SERVER_TIME"
+TIME_UNKNOWN = "TIME_UNKNOWN"
+TIMESOURCES = {
+    WALLBOX_TIME_NTP: "Wallbox self-synchronized NTP time",
+    WALLBOX_TIME_WEAK: "Wallbox weak synced time",
+    SERVER_TIME: "Server time based on Wallbox timer offset",
+    TIME_UNKNOWN: "Unknown time source",
+}
+SESSION_RUNNING = "SESSION_RUNNING"
+SESSION_CABLE_UNPLUGGED = "SESSION_CABLE_UNPLUGGED"
+SESSION_CARD_DEAUTH = "SESSION_CARD_DEAUTH"
+SESSION_STATUS_UNKNOWN = "SESSION_STATUS_UNKNOWN"
+STOP_REASONS = {
+    SESSION_RUNNING: "Charging session has not ended.",
+    SESSION_CABLE_UNPLUGGED: "Charging session was terminated by unplugging.",
+    SESSION_CARD_DEAUTH: "Charging session was terminated via deauthorization with the RFID card used for starting the session.",
+    SESSION_STATUS_UNKNOWN: "The session's status is unknown.",
+}
+
 
 # An RFID card used for authorization on the wallbox.
 class RFIDToken(models.Model):
@@ -87,6 +108,12 @@ class Wallbox(models.Model):
     currentChargePower = models.DecimalField(max_digits=9, decimal_places=3, default=Decimal(0))
     currentPowerFactor = models.DecimalField(max_digits=4, decimal_places=1, default=Decimal(0))
     currentSession = models.DecimalField(max_digits=9, decimal_places=1, default=Decimal(0))
+    currentHardwareLimit = models.IntegerField(default=Decimal(0))
+    currentEnergyMeterAtStart = models.DecimalField(max_digits=9, decimal_places=1, default=Decimal(0))
+    currentStartTime = models.DateTimeField(null=True, default=None)
+    currentSessionID = models.IntegerField(null=True, default=None)
+    currentToken = models.ForeignKey(RFIDToken, on_delete=models.PROTECT, null=True, default=None)
+    currentSessionStatus = models.CharField(max_length=255, choices=STOP_REASONS, null=True, default=None)
     energyMeter = models.DecimalField(max_digits=9, decimal_places=1, default=Decimal(0))
     phase1_voltage = models.DecimalField(max_digits=3, decimal_places=0, default=Decimal(0))
     phase2_voltage = models.DecimalField(max_digits=3, decimal_places=0, default=Decimal(0))
@@ -156,26 +183,6 @@ class ChargeSession(models.Model):
     class Meta:
         ordering = ('sessionID',)
 
-    WALLBOX_TIME_NTP = "WALLBOX_TIME_NTP"
-    WALLBOX_TIME_WEAK = "WALLBOX_TIME_WEAK"
-    SERVER_TIME = "SERVER_TIME"
-    TIME_UNKNOWN = "TIME_UNKNOWN"
-    TIMESOURCES = {
-        WALLBOX_TIME_NTP: "Wallbox self-synchronized NTP time",
-        WALLBOX_TIME_WEAK: "Wallbox weak synced time",
-        SERVER_TIME: "Server time based on Wallbox timer offset",
-        TIME_UNKNOWN: "Unknown time source",
-    }
-    SESSION_RUNNING = "SESSION_RUNNING"
-    SESSION_CABLE_UNPLUGGED = "SESSION_CABLE_UNPLUGGED"
-    SESSION_CARD_DEAUTH = "SESSION_CARD_DEAUTH"
-    SESSION_STATUS_UNKNOWN = "SESSION_STATUS_UNKNOWN"
-    STOP_REASONS = {
-        SESSION_RUNNING: "Charging session has not ended.",
-        SESSION_CABLE_UNPLUGGED: "Charging session was terminated by unplugging.",
-        SESSION_CARD_DEAUTH: "Charging session was terminated via deauthorization with the RFID card used for starting the session.",
-        SESSION_STATUS_UNKNOWN: "The session's status is unknown.",
-    }
     created = models.DateTimeField(auto_now_add=True)
     sessionID = models.IntegerField(primary_key=True)
     hardwareCurrentLimit = models.IntegerField()
@@ -202,24 +209,24 @@ class ChargeSession(models.Model):
     def time_status_from_raw(cls, raw_id):
         raw_id = str(raw_id)
         if raw_id == "0":
-            return cls.TIME_UNKNOWN
+            return TIME_UNKNOWN
         if raw_id == "2":
-            return cls.WALLBOX_TIME_WEAK
+            return WALLBOX_TIME_WEAK
         if raw_id == "3" or raw_id == "X":
-            return cls.WALLBOX_TIME_NTP
-        return cls.TIME_UNKNOWN
+            return WALLBOX_TIME_NTP
+        return TIME_UNKNOWN
 
     @classmethod
     def reason_from_raw(cls, raw_id):
         id_map = {
-            0: cls.SESSION_RUNNING,
-            1: cls.SESSION_CABLE_UNPLUGGED,
-            10: cls.SESSION_CARD_DEAUTH,
+            0: SESSION_RUNNING,
+            1: SESSION_CABLE_UNPLUGGED,
+            10: SESSION_CARD_DEAUTH,
         }
         try:
             return id_map[raw_id]
         except KeyError:
-            return cls.SESSION_STATUS_UNKNOWN
+            return SESSION_STATUS_UNKNOWN
 
 
 # Don't show sensitive tables in the admin UI. This makes it harder to perform accidental modifications.

@@ -22,6 +22,7 @@ class ChargeSessionSerializer(serializers.ModelSerializer):
 
 class WallboxSerializer(serializers.ModelSerializer):
     uptime = serializers.SerializerMethodField()
+    currentToken = RFIDSerializer()
 
     class Meta:
         model = Wallbox

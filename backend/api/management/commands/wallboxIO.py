@@ -12,7 +12,7 @@ import urllib.request
 import asyncudp
 from django.core.management import BaseCommand
 
-from api.models import Wallbox, ChargeSession, RFIDToken
+from api.models import Wallbox, ChargeSession, RFIDToken, WALLBOX_TIME_NTP, SERVER_TIME
 from backend.settings import WALLBOX_IP, HEALTHCHECK_URL
 
 WALLBOX_PORT = 7090
@@ -30,6 +30,7 @@ BUILDUP = b'i'
 SYSTEM_STATUS = b'report 1'
 CONFIGURATION_STATUS = b'report 2'
 CHARGING_STATUS = b'report 3'
+CURRENT_SESSION_STATUS = b'report 100'
 
 schedule_probe = True
 last_state = None
@@ -58,6 +59,10 @@ def validate_config_status(message):
 
 def validate_charging_status(message):
     return validate_json(message, 3)
+
+
+def validate_current_charge_session(message):
+    return validate_json(message, 100)
 
 
 def validate_progress_report(message):
@@ -98,6 +103,34 @@ def parse_weak_timestamps(start_seconds, end_seconds, current_seconds):
     return start, end
 
 
+async def parse_charge_session(raw_data):
+    if int(raw_data['Session ID']) == -1:
+        return None
+    session = ChargeSession(pk=int(raw_data['Session ID']))
+    session.hardwareCurrentLimit = int(raw_data['Curr HW'])
+    session.energyMeterAtStart = Decimal(raw_data['E start']) / Decimal(10)
+    session.chargedEnergy = Decimal(raw_data['E pres']) / Decimal(10)
+    timesource = ChargeSession.time_status_from_raw(raw_data['timeQ'])
+    if timesource == WALLBOX_TIME_NTP:
+        started, ended = parse_datetime(raw_data['started'], raw_data['ended'])
+    else:  # For any other time source, use local time
+        started, ended = parse_weak_timestamps(int(raw_data['started[s]']), int(raw_data['ended[s]']),
+                                               int(raw_data['Sec']))
+        timesource = SERVER_TIME
+    session.timesource = timesource
+    session.started = started
+    session.ended = ended
+    session.stopReason = ChargeSession.reason_from_raw(int(raw_data['reason']))
+    session.wallboxSerial = await Wallbox.get_instance(raw_data['Serial'])
+    session.token = await RFIDToken.get_instance(raw_data['RFID tag'], raw_data['RFID class'])
+    return session
+
+
+async def add_charge_session(raw_data):
+    session = await parse_charge_session(raw_data)
+    await session.asave()
+
+
 async def update_from_report(report):
     serial = report['Serial']
     wallbox = await Wallbox.get_instance(serial)
@@ -123,29 +156,18 @@ async def update_from_report(report):
         wallbox.phase2_current = Decimal(report['I2']) / Decimal(1000)
         wallbox.phase3_current = Decimal(report['I3']) / Decimal(1000)
         wallbox.uptime = datetime.timedelta(seconds=report['Sec'])
+    if report['ID'] == str(100):
+        session = await parse_charge_session(report)
+        if session is not None:
+            wallbox.currentHardwareLimit = session.hardwareCurrentLimit
+            wallbox.currentEnergyMeterAtStart = session.energyMeterAtStart
+            wallbox.currentSession = session.chargedEnergy
+            wallbox.currentStartTime = session.started
+            wallbox.currentSessionStatus = session.stopReason
+            wallbox.currentToken = session.token
+            wallbox.currentSessionID = session.sessionID
+
     await wallbox.asave()
-
-
-async def add_charge_session(raw_data):
-    session = ChargeSession(pk=int(raw_data['Session ID']))
-    session.hardwareCurrentLimit = int(raw_data['Curr HW'])
-    session.energyMeterAtStart = Decimal(raw_data['E start']) / Decimal(10)
-    session.chargedEnergy = Decimal(raw_data['E pres']) / Decimal(10)
-    timesource = ChargeSession.time_status_from_raw(raw_data['timeQ'])
-    if timesource == ChargeSession.WALLBOX_TIME_NTP:
-        started, ended = parse_datetime(raw_data['started'], raw_data['ended'])
-    else:  # For any other time source, use local time
-        started, ended = parse_weak_timestamps(int(raw_data['started[s]']), int(raw_data['ended[s]']),
-                                               int(raw_data['Sec']))
-        timesource = ChargeSession.SERVER_TIME
-    session.timesource = timesource
-    session.started = started
-    session.ended = ended
-    session.stopReason = ChargeSession.reason_from_raw(int(raw_data['reason']))
-    session.wallboxSerial = await Wallbox.get_instance(raw_data['Serial'])
-    session.token = await RFIDToken.get_instance(raw_data['RFID tag'], raw_data['RFID class'])
-
-    await session.asave()
 
 
 class WallboxCommunicator:
@@ -209,9 +231,12 @@ class WallboxCommunicator:
         self.last_state = int(config_status['State'])
         charging_status = json.loads(await self._send(CHARGING_STATUS, validate_charging_status))
         print(f"Charging status: {json.dumps(charging_status, indent=4)}")
+        current_session = json.loads(await self._send(CURRENT_SESSION_STATUS, validate_current_charge_session))
+        print(f"Current session: {json.dumps(current_session, indent=4)}")
         await update_from_report(system_status)
         await update_from_report(config_status)
         await update_from_report(charging_status)
+        await update_from_report(current_session)
         await self.search_for_new_sessions()
         return True
 
@@ -283,3 +308,4 @@ class Command(BaseCommand):
 
     def handle(self, **options) -> str:
         asyncio.run(main())
+        return "Exit."
