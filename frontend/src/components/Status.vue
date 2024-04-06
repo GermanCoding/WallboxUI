@@ -54,6 +54,8 @@ export default {
       }
       let box = this.raw_data[0];
       let currentStart = new Date(box.currentStartTime)
+      let isRunning = box.currentEndTime == null;
+      let durationRaw = isRunning ? new Date() - currentStart : new Date(box.currentEndTime) - currentStart;
       return {
         product: box.product,
         serial: box.serial,
@@ -67,10 +69,11 @@ export default {
         currentHardwareLimit: formatMilliAmpere(box.currentHardwareLimit),
         currentEnergyMeterAtStart: formatkWh(box.currentEnergyMeterAtStart),
         currentStartTime: currentStart.toLocaleString(),
-        currentDuration: formatDuration(new Date() - currentStart),
+        currentDuration: formatDuration(durationRaw),
         currentSessionID: box.currentSessionID,
         currentToken: tokenToString(box.currentToken),
         currentSessionStatus: STOP_REASONS[box.currentSessionStatus],
+        isRunning: isRunning,
         energyMeter: formatkWh(box.energyMeter),
         phase1: formatValue(box.phase1_voltage, "V") + " / " + formatValue(box.phase1_current, "A"),
         phase2: formatValue(box.phase2_voltage, "V") + " / " + formatValue(box.phase2_current, "A"),
@@ -78,6 +81,13 @@ export default {
         last_update: compareTime(box.lastUpdated),
         uptime: "vor " + formatDuration(box.uptime * 1000)
       };
+    },
+    sessionTitle() {
+      if (this.wallbox.isRunning) {
+        return "Aktuelle Sitzung";
+      } else {
+        return "Letzte Sitzung";
+      }
     },
     cols() {
       const {xxl, xl, lg} = this.$vuetify.display
@@ -232,7 +242,7 @@ export default {
     </v-row>
     <v-row>
       <v-col :cols="cols">
-        <v-card prepend-icon="mdi-car-electric" title="Aktuelle Sitzung">
+        <v-card prepend-icon="mdi-car-electric" :title="sessionTitle">
           <v-card-text>
             <v-row no-gutters>
               <v-col class="font-weight-bold text-left" cols="auto">
