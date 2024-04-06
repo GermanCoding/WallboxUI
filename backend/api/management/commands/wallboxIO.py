@@ -12,7 +12,8 @@ import urllib.request
 import asyncudp
 from django.core.management import BaseCommand
 
-from api.models import Wallbox, ChargeSession, RFIDToken, WALLBOX_TIME_NTP, SERVER_TIME
+from api.models import Wallbox, ChargeSession, RFIDToken, WALLBOX_TIME_NTP, SERVER_TIME, SESSION_CABLE_UNPLUGGED, \
+    SESSION_CARD_DEAUTH
 from backend.settings import WALLBOX_IP, HEALTHCHECK_URL
 
 WALLBOX_PORT = 7090
@@ -163,6 +164,10 @@ async def update_from_report(report):
             wallbox.currentEnergyMeterAtStart = session.energyMeterAtStart
             wallbox.currentSession = session.chargedEnergy
             wallbox.currentStartTime = session.started
+            if session.stopReason in [SESSION_CABLE_UNPLUGGED, SESSION_CARD_DEAUTH]:
+                wallbox.currentEndTime = session.ended
+            else:
+                wallbox.currentEndTime = None
             wallbox.currentSessionStatus = session.stopReason
             wallbox.currentToken = session.token
             wallbox.currentSessionID = session.sessionID

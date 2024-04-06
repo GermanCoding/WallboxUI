@@ -111,6 +111,7 @@ class Wallbox(models.Model):
     currentHardwareLimit = models.IntegerField(default=Decimal(0))
     currentEnergyMeterAtStart = models.DecimalField(max_digits=9, decimal_places=1, default=Decimal(0))
     currentStartTime = models.DateTimeField(null=True, default=None)
+    currentEndTime = models.DateTimeField(null=True, default=None)
     currentSessionID = models.IntegerField(null=True, default=None)
     currentToken = models.ForeignKey(RFIDToken, on_delete=models.PROTECT, null=True, default=None)
     currentSessionStatus = models.CharField(max_length=255, choices=STOP_REASONS, null=True, default=None)
