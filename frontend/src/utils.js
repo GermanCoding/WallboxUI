@@ -46,6 +46,9 @@ export function compareTime(timestamp) {
 }
 
 export function tokenToString(token) {
+  if (token == null) {
+    return "N/A";
+  }
   if (token.name) {
     return token.name;
   } else {
