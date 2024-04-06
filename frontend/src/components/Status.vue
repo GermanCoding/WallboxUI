@@ -270,22 +270,6 @@ export default {
             </v-row>
             <v-row no-gutters>
               <v-col class="font-weight-bold text-left" cols="auto">
-                Start der Sitzung
-              </v-col>
-              <v-col class="font-weight-regular text-right">
-                {{ wallbox.currentStartTime }}
-              </v-col>
-            </v-row>
-            <v-row no-gutters>
-              <v-col class="font-weight-bold text-left" cols="auto">
-                Dauer der Sitzung
-              </v-col>
-              <v-col class="font-weight-regular text-right">
-                {{ wallbox.currentDuration }}
-              </v-col>
-            </v-row>
-            <v-row no-gutters>
-              <v-col class="font-weight-bold text-left" cols="auto">
                 Zählerstand bei Start
               </v-col>
               <v-col class="font-weight-regular text-right">
@@ -298,6 +282,22 @@ export default {
               </v-col>
               <v-col class="font-weight-regular text-right">
                 {{ wallbox.currentHardwareLimit }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Start der Sitzung
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.currentStartTime }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="font-weight-bold text-left" cols="auto">
+                Dauer der Sitzung
+              </v-col>
+              <v-col class="font-weight-regular text-right">
+                {{ wallbox.currentDuration }}
               </v-col>
             </v-row>
             <v-row no-gutters>
