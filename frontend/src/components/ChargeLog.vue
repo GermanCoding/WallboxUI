@@ -107,11 +107,17 @@ export default {
           if (value === null) {
             return '';
           }
-          if (typeof value === 'string') {
-            // Check if this string is actually a number
-            if (value.match(/^[+-]?\d+(?:\.\d+)?$/)) {
+          switch (key) {
+            case "chargedEnergy": {
               let number = Number(value);
               return number.toLocaleString();
+            }
+            case "token": {
+              return tokenToString(value);
+            }
+            case "started":
+            case "ended": {
+              return new Date(value).toLocaleString();
             }
           }
           return value;
@@ -129,7 +135,6 @@ export default {
         for (let i = 0; i < json.length; i++) {
           let element = json[i];
           element['wallboxProduct'] = this.wallboxSerialToProduct(element['wallboxSerial']);
-          element['token'] = tokenToString(element['token']);
           for (let key in element) {
             if (!export_headers.some(header => header.key === key)) {
               delete element[key];
@@ -145,7 +150,9 @@ export default {
         let fields = Object.keys(json[0]);
         let csv = json.map(function (row) {
           return fields.map(function (fieldName) {
-            return JSON.stringify(row[fieldName], replacer)
+            return JSON.stringify(row[fieldName], function (key, value) {
+              return replacer(fieldName, value);
+            });
           }).join(';')
         })
         csv.unshift(fields.map(rawKey => export_headers.find(key => key.key == rawKey).displayName).join(';'))
@@ -161,7 +168,7 @@ export default {
           export_filename += "__" + this.exportTokens;
         }
         export_filename += ".csv";
-        download(export_filename, csv, "text/csv");
+        download(export_filename, csv, "text/csv;;charset=utf-8");
       }).catch(error => {
         console.log(error);
         this.error = error;
