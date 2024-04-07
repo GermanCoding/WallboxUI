@@ -117,7 +117,22 @@ export default {
             }
             case "started":
             case "ended": {
-              return new Date(value).toLocaleString();
+              function dateToExcelFormat(date) {
+                const year = date.getFullYear();
+                const month = padZero(date.getMonth() + 1);
+                const day = padZero(date.getDate());
+                const hour = padZero(date.getHours());
+                const minute = padZero(date.getMinutes());
+                const second = padZero(date.getSeconds());
+
+                return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+              }
+
+              function padZero(number) {
+                return number < 10 ? '0' + number : number;
+              }
+
+              return dateToExcelFormat(new Date(value));
             }
           }
           return value;
@@ -168,7 +183,7 @@ export default {
           export_filename += "__" + this.exportTokens;
         }
         export_filename += ".csv";
-        download(export_filename, csv, "text/csv;;charset=utf-8");
+        download(export_filename, csv, "text/csv;charset=utf-8");
       }).catch(error => {
         console.log(error);
         this.error = error;
