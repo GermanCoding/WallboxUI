@@ -164,7 +164,7 @@ async def update_from_report(report):
             wallbox.currentEnergyMeterAtStart = session.energyMeterAtStart
             wallbox.currentSession = session.chargedEnergy
             wallbox.currentStartTime = session.started
-            if session.stopReason in [SESSION_CABLE_UNPLUGGED, SESSION_CARD_DEAUTH]:
+            if report["ended[s]"] > 0:
                 wallbox.currentEndTime = session.ended
             else:
                 wallbox.currentEndTime = None
