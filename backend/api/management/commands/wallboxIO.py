@@ -105,7 +105,7 @@ def parse_weak_timestamps(start_seconds, end_seconds, current_seconds):
 
 
 async def parse_charge_session(raw_data):
-    if int(raw_data['Session ID']) == -1:
+    if int(raw_data['Session ID']) < 1:
         return None
     session = ChargeSession(pk=int(raw_data['Session ID']))
     session.hardwareCurrentLimit = int(raw_data['Curr HW'])
