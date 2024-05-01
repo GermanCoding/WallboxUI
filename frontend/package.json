@@ -13,7 +13,7 @@
     "axios": "^1.6.8",
     "humanize-duration": "^3.32.0",
     "roboto-fontface": "*",
-    "vue": "^3.2.0",
+    "vue": "^3.4.26",
     "vue-router": "^4.3.2",
     "vuetify": "^3.6.1"
   },
