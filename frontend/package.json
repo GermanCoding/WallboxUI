@@ -14,7 +14,7 @@
     "humanize-duration": "^3.32.1",
     "roboto-fontface": "*",
     "vue": "^3.4.27",
-    "vue-router": "^4.3.2",
+    "vue-router": "^4.4.0",
     "vuetify": "^3.6.1"
   },
   "devDependencies": {
