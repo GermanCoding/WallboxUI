@@ -96,15 +96,29 @@ def parse_datetime(timestring_start, timestring_end):
 
 
 def parse_weak_timestamps(start_seconds, end_seconds, current_seconds):
-    # current_offset is the wallbox current time in seconds since boot. Assuming that
-    # we've received the data packet just now, this offset is more or less exactly
-    # the current time (+ network/processing delays). We can then use this anchor in time
-    # to compute the start and end time
-    now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)
-    start_offset = current_seconds - start_seconds
-    end_offset = current_seconds - end_seconds
-    start = now - datetime.timedelta(seconds=start_offset)
-    end = now - datetime.timedelta(seconds=end_offset)
+    # Note: There is an undocumented feature here: "Sometimes", the wallbox puts a Unix timestamp
+    # into these fields, instead of a relative time. We can detect this by looking for impossible values.
+    if start_seconds > (current_seconds + 1):
+        # Impossibly large start_seconds - probably unix time
+        start = datetime.datetime.fromtimestamp(start_seconds, tz=datetime.timezone.utc)
+        # Live session
+        if end_seconds == 0:
+            end = None
+        else:
+            end = datetime.datetime.fromtimestamp(end_seconds, tz=datetime.timezone.utc)
+    else:
+        # current_offset is the wallbox current time in seconds since boot. Assuming that
+        # we've received the data packet just now, this offset is more or less exactly
+        # the current time (+ network/processing delays). We can then use this anchor in time
+        # to compute the start and end time
+        now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0)
+        start_offset = current_seconds - start_seconds
+        end_offset = current_seconds - end_seconds
+        start = now - datetime.timedelta(seconds=start_offset)
+        end = now - datetime.timedelta(seconds=end_offset)
+        # Live session
+        if start_seconds > end_seconds == 0:
+            end = None
     return start, end
 
 
@@ -116,10 +130,7 @@ async def parse_charge_session(raw_data):
     session.energyMeterAtStart = Decimal(raw_data['E start']) / Decimal(10)
     session.chargedEnergy = Decimal(raw_data['E pres']) / Decimal(10)
     timesource = ChargeSession.time_status_from_raw(raw_data['timeQ'])
-    raw_started = str(raw_data['started'])
-    if timesource == WALLBOX_TIME_NTP or (timesource == TIME_UNKNOWN and raw_started != "0"):
-        # Prefer wallbox started string if possible, as the timer values tend to be unreliable
-        # during live sessions.
+    if timesource == WALLBOX_TIME_NTP:
         started, ended = parse_datetime(raw_data['started'], raw_data['ended'])
     else:  # For any other time source, use local time
         started, ended = parse_weak_timestamps(int(raw_data['started[s]']), int(raw_data['ended[s]']),
