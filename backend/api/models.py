@@ -222,6 +222,8 @@ class ChargeSession(models.Model):
         id_map = {
             0: SESSION_RUNNING,
             1: SESSION_CABLE_UNPLUGGED,
+            # Undocumented code used for running sessions
+            5: SESSION_RUNNING,
             10: SESSION_CARD_DEAUTH,
         }
         try:

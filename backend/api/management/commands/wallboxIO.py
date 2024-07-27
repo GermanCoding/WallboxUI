@@ -13,7 +13,7 @@ import asyncudp
 from django.core.management import BaseCommand
 
 from api.models import Wallbox, ChargeSession, RFIDToken, WALLBOX_TIME_NTP, SERVER_TIME, SESSION_CABLE_UNPLUGGED, \
-    SESSION_CARD_DEAUTH
+    SESSION_CARD_DEAUTH, TIME_UNKNOWN
 from backend.settings import WALLBOX_IP, HEALTHCHECK_URL
 
 WALLBOX_PORT = 7090
@@ -86,8 +86,12 @@ def parse_datetime(timestring_start, timestring_end):
     format = "%Y-%m-%d %H:%M:%S.%f"
     start = datetime.datetime.strptime(timestring_start, format)
     start = start.replace(tzinfo=datetime.timezone.utc)
-    end = datetime.datetime.strptime(timestring_end, format)
-    end = end.replace(tzinfo=datetime.timezone.utc)
+    # End time may not be set for live sessions
+    if timestring_end != "0":
+        end = datetime.datetime.strptime(timestring_end, format)
+        end = end.replace(tzinfo=datetime.timezone.utc)
+    else:
+        end = None
     return start, end
 
 
@@ -112,7 +116,10 @@ async def parse_charge_session(raw_data):
     session.energyMeterAtStart = Decimal(raw_data['E start']) / Decimal(10)
     session.chargedEnergy = Decimal(raw_data['E pres']) / Decimal(10)
     timesource = ChargeSession.time_status_from_raw(raw_data['timeQ'])
-    if timesource == WALLBOX_TIME_NTP:
+    raw_started = str(raw_data['started'])
+    if timesource == WALLBOX_TIME_NTP or (timesource == TIME_UNKNOWN and raw_started != "0"):
+        # Prefer wallbox started string if possible, as the timer values tend to be unreliable
+        # during live sessions.
         started, ended = parse_datetime(raw_data['started'], raw_data['ended'])
     else:  # For any other time source, use local time
         started, ended = parse_weak_timestamps(int(raw_data['started[s]']), int(raw_data['ended[s]']),
@@ -164,6 +171,7 @@ async def update_from_report(report):
             wallbox.currentEnergyMeterAtStart = session.energyMeterAtStart
             wallbox.currentSession = session.chargedEnergy
             wallbox.currentStartTime = session.started
+            # This is probably unnecessary since the parser will have already done this
             if report["ended[s]"] > 0:
                 wallbox.currentEndTime = session.ended
             else:
