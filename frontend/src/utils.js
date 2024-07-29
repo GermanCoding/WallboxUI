@@ -63,6 +63,13 @@ export const STOP_REASONS = {
   SESSION_STATUS_UNKNOWN: "Unbekannt",
 }
 
+export const STOP_REASONS_AS_STATUS = {
+  SESSION_RUNNING: "Lädt",
+  SESSION_CABLE_UNPLUGGED: "Beendet (Kabel entfernt)",
+  SESSION_CARD_DEAUTH: "Beendet (RFID-Karte)",
+  SESSION_STATUS_UNKNOWN: "Unbekannt",
+}
+
 
 export const TIME_STATUS = {
   UC_TQ_NONE: "Nicht eingestellt (keine Informationen)",

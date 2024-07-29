@@ -6,7 +6,7 @@ import {
   formatkW,
   formatkWh, formatMilliAmpere,
   formatValue,
-  PLUG_STATE, STOP_REASONS,
+  PLUG_STATE, STOP_REASONS_AS_STATUS,
   SYSTEM_STATE,
   TIME_STATUS, tokenToString
 } from "@/utils";
@@ -72,7 +72,7 @@ export default {
         currentDuration: formatDuration(durationRaw),
         currentSessionID: box.currentSessionID,
         currentToken: tokenToString(box.currentToken),
-        currentSessionStatus: STOP_REASONS[box.currentSessionStatus],
+        currentSessionStatus: STOP_REASONS_AS_STATUS[box.currentSessionStatus],
         isRunning: isRunning,
         energyMeter: formatkWh(box.energyMeter),
         phase1: formatValue(box.phase1_voltage, "V") + " / " + formatValue(box.phase1_current, "A"),
