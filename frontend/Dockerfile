@@ -8,7 +8,7 @@ RUN npm install && npm run build
 FROM python:slim-bookworm
 ENV PYTHONUNBUFFERED=1
 # Keep in sync with backend/requirements.txt
-RUN pip install Django==5.0.7
+RUN pip install Django==5.1
 
 # Create a python module to tell django to use the staticfiles app
 RUN mkdir /django-static && mkdir sdjango && cd sdjango && \
