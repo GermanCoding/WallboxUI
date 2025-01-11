@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
-    "axios": "^1.7.8",
+    "axios": "^1.7.9",
     "humanize-duration": "^3.32.1",
     "roboto-fontface": "*",
     "vue": "^3.5.13",
