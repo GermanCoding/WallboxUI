@@ -13,7 +13,7 @@ import asyncudp
 from django.core.management import BaseCommand
 
 from api.models import Wallbox, ChargeSession, RFIDToken, WALLBOX_TIME_NTP, SERVER_TIME, SESSION_CABLE_UNPLUGGED, \
-    SESSION_CARD_DEAUTH, TIME_UNKNOWN
+    SESSION_CARD_DEAUTH, TIME_UNKNOWN, SESSION_RUNNING, SESSION_STATUS_UNKNOWN
 from backend.settings import WALLBOX_IP, HEALTHCHECK_URL
 
 WALLBOX_PORT = 7090
@@ -187,6 +187,9 @@ async def update_from_report(report):
                 wallbox.currentEndTime = session.ended
             else:
                 wallbox.currentEndTime = None
+            if session.stopReason == SESSION_RUNNING and wallbox.currentEndTime is not None:
+                # Sometimes, the wallbox reports that the session has ended, but the stopReason is put to 0 for some reason
+                wallbox.currentSessionStatus = SESSION_STATUS_UNKNOWN
             wallbox.currentSessionStatus = session.stopReason
             wallbox.currentToken = session.token
             wallbox.currentSessionID = session.sessionID
