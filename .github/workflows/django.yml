@@ -82,7 +82,7 @@ jobs:
         echo "base_tag=${BASE_TAG}" >> "${GITHUB_OUTPUT}"
         echo "arch_tag=${BASE_TAG}-${{ matrix.arch }}" >> "${GITHUB_OUTPUT}"
     - name: Build and push backend image
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: ${{ matrix.platform }}
         context: ./backend
