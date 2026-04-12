@@ -1,6 +1,6 @@
 asyncudp==0.11.0
 Django==6.0.3 # keep in sync with frontend/Dockerfile
-django-rest-knox==5.0.2
+django-rest-knox==5.0.4
 djangorestframework==3.17.1
 django_probes==1.8.0
 django-cors-headers==4.9.0
