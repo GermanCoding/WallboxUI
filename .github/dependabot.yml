@@ -17,6 +17,10 @@ updates:
     schedule:
       interval: "monthly"
   - package-ecosystem: "pip"
+    directory: "/frontend"
+    schedule:
+      interval: "monthly"
+  - package-ecosystem: "pip"
     directory: "/backend"
     schedule:
       interval: "monthly"
